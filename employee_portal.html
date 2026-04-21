@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>昼食補助 — 従業員ポータル</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F4F3F0;
+    --surface: #FFFFFF;
+    --border: #E8E6E0;
+    --text: #1A1916;
+    --text-sub: #6B6860;
+    --text-hint: #A09D96;
+    --blue: #185FA5;
+    --blue-bg: #E6F1FB;
+    --blue-dark: #0C447C;
+    --green: #3B6D11;
+    --green-bg: #EAF3DE;
+    --amber: #854F0B;
+    --amber-bg: #FAEEDA;
+    --red: #A32D2D;
+    --red-bg: #FCEBEB;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+  body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 24px 16px; }
+
+  .device-wrap { width: 100%; max-width: 390px; }
+  .device { background: var(--surface); border-radius: 28px; overflow: hidden; box-shadow: 0 2px 24px rgba(0,0,0,.10); min-height: 720px; display: flex; flex-direction: column; }
+  .status-bar { background: var(--surface); padding: 12px 20px 4px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 600; }
+
+  .header { padding: 8px 20px 14px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .header-title { font-size: 17px; font-weight: 600; }
+  .header-sub { font-size: 12px; color: var(--text-sub); }
+
+  .scroll-body { flex: 1; overflow-y: auto; padding-bottom: 80px; }
+  .section { padding: 16px; }
+  .section + .section { padding-top: 0; }
+
+  .balance-card { background: linear-gradient(135deg, #1A3A6B 0%, #185FA5 100%); border-radius: var(--radius); padding: 20px; color: white; margin-bottom: 12px; }
+  .balance-label { font-size: 11px; opacity: .75; margin-bottom: 4px; }
+  .balance-amount { font-size: 36px; font-weight: 600; line-height: 1; }
+  .balance-period { font-size: 11px; opacity: .65; margin-top: 4px; }
+  .balance-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .balance-mini { background: rgba(255,255,255,.15); border-radius: 8px; padding: 10px; }
+  .balance-mini-label { font-size: 10px; opacity: .7; }
+  .balance-mini-value { font-size: 14px; font-weight: 600; margin-top: 3px; }
+
+  .alert-card { border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 10px; display: flex; align-items: flex-start; gap: 10px; }
+  .alert-warn { background: var(--amber-bg); border: 1px solid #FAC775; }
+  .alert-info { background: var(--blue-bg); border: 1px solid #B5D4F4; }
+  .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .alert-title { font-size: 13px; font-weight: 600; color: var(--amber); }
+  .alert-info .alert-title { color: var(--blue-dark); }
+  .alert-body { font-size: 11px; color: var(--amber); margin-top: 2px; }
+  .alert-info .alert-body { color: var(--blue-dark); opacity: .85; }
+
+  .section-title { font-size: 12px; font-weight: 600; color: var(--text-sub); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px; }
+
+  .history-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .history-item:last-child { border-bottom: none; }
+  .history-icon { width: 40px; height: 40px; border-radius: var(--radius-sm); background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .history-info { flex: 1; min-width: 0; }
+  .history-name { font-size: 14px; font-weight: 500; }
+  .history-date { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+  .history-right { text-align: right; flex-shrink: 0; }
+  .history-amount { font-size: 14px; font-weight: 600; }
+  .history-badge { margin-top: 3px; }
+
+  .badge { display: inline-flex; align-items: center; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 99px; }
+  .badge-green { background: var(--green-bg); color: var(--green); }
+  .badge-amber { background: var(--amber-bg); color: var(--amber); }
+  .badge-red { background: var(--red-bg); color: var(--red); }
+  .badge-blue { background: var(--blue-bg); color: var(--blue-dark); }
+  .badge-gray { background: var(--bg); color: var(--text-sub); border: 1px solid var(--border); }
+
+  .upload-area { border: 2px dashed var(--border); border-radius: var(--radius); padding: 28px 20px; text-align: center; margin-bottom: 14px; }
+  .upload-icon { font-size: 36px; margin-bottom: 10px; }
+  .upload-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .upload-sub { font-size: 12px; color: var(--text-sub); margin-bottom: 14px; }
+  .upload-btns { display: flex; gap: 8px; justify-content: center; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 18px; font-size: 13px; font-family: inherit; border-radius: var(--radius-sm); cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-weight: 500; }
+  .btn-primary { background: var(--text); color: #fff; border-color: var(--text); }
+  .btn-full { width: 100%; padding: 14px; font-size: 15px; border-radius: var(--radius); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn-cam { background: var(--blue); color: white; border-color: var(--blue); }
+
+  .pending-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg); border-radius: var(--radius-sm); margin-bottom: 8px; }
+  .pending-info { flex: 1; min-width: 0; }
+  .pending-name { font-size: 13px; font-weight: 500; }
+  .pending-meta { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+
+  .card-register { text-align: center; padding: 24px 0 8px; }
+  .card-register-icon { font-size: 48px; margin-bottom: 12px; }
+  .card-register-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .card-register-sub { font-size: 12px; color: var(--text-sub); line-height: 1.7; margin-bottom: 20px; }
+  .card-id-input { font-size: 17px; letter-spacing: 3px; text-align: center; padding: 12px; border: 2px solid var(--border); border-radius: var(--radius-sm); width: 100%; font-family: monospace; margin-bottom: 8px; }
+  .card-id-input:focus { outline: none; border-color: var(--blue); }
+  .card-register-hint { font-size: 11px; color: var(--text-hint); margin-bottom: 16px; }
+
+  .bottom-nav { position: sticky; bottom: 0; background: var(--surface); border-top: 1px solid var(--border); display: flex; padding: 8px 0 16px; }
+  .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px; }
+  .nav-icon { font-size: 20px; }
+  .nav-label-text { font-size: 10px; color: var(--text-sub); }
+  .nav-item.active .nav-label-text { color: var(--blue); font-weight: 600; }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  input[type=text], input[type=number] {
+    font-family: inherit; font-size: 14px; padding: 12px 14px;
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--text); width: 100%;
+  }
+  input:focus { outline: none; border-color: var(--blue); }
+</style>
+</head>
+<body>
+<div class="device-wrap">
+  <div style="text-align:center;margin-bottom:16px;">
+    <div style="font-size:13px;color:var(--text-sub);">従業員ポータル — スマホ表示プレビュー</div>
+    <div style="display:flex;justify-content:center;gap:8px;margin-top:8px;">
+      <button class="btn btn-sm" onclick="gotoPage('home')">ホーム</button>
+      <button class="btn btn-sm" onclick="gotoPage('upload')">レシート提出</button>
+      <button class="btn btn-sm" onclick="gotoPage('history')">申請履歴</button>
+      <button class="btn btn-sm" onclick="gotoPage('card')">カード登録</button>
+    </div>
+  </div>
+
+  <div class="device">
+    <div class="status-bar"><span>9:41</span><span>●●● WiFi 🔋</span></div>
+
+    <!-- ホーム -->
+    <div id="page-home" class="page active">
+      <div class="header">
+        <div><div class="header-title">昼食補助</div><div class="header-sub">山田 太郎 · 正社員</div></div>
+        <div style="font-size:22px;">👤</div>
+      </div>
+      <div class="scroll-body">
+        <div class="section">
+          <div class="balance-card">
+            <div class="balance-label">今月の会社補助残高</div>
+            <div class="balance-amount">¥5,000</div>
+            <div class="balance-period">2026年4月 · 〆切: 4月25日</div>
+            <div class="balance-grid">
+              <div class="balance-mini"><div class="balance-mini-label">使用済み</div><div class="balance-mini-value">¥1,800</div></div>
+              <div class="balance-mini"><div class="balance-mini-label">残り</div><div class="balance-mini-value">¥3,200</div></div>
+              <div class="balance-mini"><div class="balance-mini-label">天引き予定</div><div class="balance-mini-value">¥900</div></div>
+            </div>
+          </div>
+          <div class="alert-card alert-warn">
+            <div class="alert-icon">⚠️</div>
+            <div>
+              <div class="alert-title">未提出のレシートが2件あります</div>
+              <div class="alert-body">〆切まであと4日。未提出分は全額天引きになります。</div>
+            </div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title">最近の利用</div>
+          <div class="history-item">
+            <div class="history-icon">🍱</div>
+            <div class="history-info"><div class="history-name">セブン-イレブン</div><div class="history-date">4月18日 · 昼食 ¥840 / 対象外 ¥400</div></div>
+            <div class="history-right"><div class="history-amount">¥840</div><div class="history-badge"><span class="badge badge-green">承認済み</span></div></div>
+          </div>
+          <div class="history-item">
+            <div class="history-icon">🍜</div>
+            <div class="history-info"><div class="history-name">松屋</div><div class="history-date">4月17日 · 牛めし</div></div>
+            <div class="history-right"><div class="history-amount">¥680</div><div class="history-badge"><span class="badge badge-green">承認済み</span></div></div>
+          </div>
+          <div class="history-item">
+            <div class="history-icon">💳</div>
+            <div class="history-info"><div class="history-name">iD決済 — 未紐付け</div><div class="history-date">4月16日 · ¥1,240</div></div>
+            <div class="history-right"><div class="history-amount">¥1,240</div><div class="history-badge"><span class="badge badge-amber">未提出</span></div></div>
+          </div>
+          <div class="history-item">
+            <div class="history-icon">💳</div>
+            <div class="history-info"><div class="history-name">iD決済 — 未紐付け</div><div class="history-date">4月15日 · ¥550</div></div>
+            <div class="history-right"><div class="history-amount">¥550</div><div class="history-badge"><span class="badge badge-amber">未提出</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item active" onclick="gotoPage('home')"><span class="nav-icon">🏠</span><span class="nav-label-text">ホーム</span></div>
+        <div class="nav-item" onclick="gotoPage('upload')"><span class="nav-icon">📷</span><span class="nav-label-text">提出</span></div>
+        <div class="nav-item" onclick="gotoPage('history')"><span class="nav-icon">📋</span><span class="nav-label-text">履歴</span></div>
+      </div>
+    </div>
+
+    <!-- レシート提出 -->
+    <div id="page-upload" class="page">
+      <div class="header">
+        <div><div class="header-title">レシート提出</div><div class="header-sub">〆切: 4月25日（残4日）</div></div>
+      </div>
+      <div class="scroll-body">
+        <div class="section">
+          <div class="upload-area">
+            <div class="upload-icon">📷</div>
+            <div class="upload-title">レシートをアップロード</div>
+            <div class="upload-sub">昼食対象分を自動で判定します</div>
+            <div class="upload-btns">
+              <button class="btn btn-cam">カメラで撮影</button>
+              <button class="btn">ギャラリー</button>
+            </div>
+          </div>
+          <div class="section-title">未提出のiD利用</div>
+          <div class="pending-item">
+            <div style="font-size:24px;">💳</div>
+            <div class="pending-info">
+              <div class="pending-name">iD決済</div>
+              <div class="pending-meta">4月16日 · ¥1,240</div>
+            </div>
+            <button class="btn btn-sm btn-primary">レシート提出</button>
+          </div>
+          <div class="pending-item">
+            <div style="font-size:24px;">💳</div>
+            <div class="pending-info">
+              <div class="pending-name">iD決済</div>
+              <div class="pending-meta">4月15日 · ¥550</div>
+            </div>
+            <button class="btn btn-sm btn-primary">レシート提出</button>
+          </div>
+          <div class="alert-card alert-info" style="margin-top:12px;">
+            <div class="alert-icon">ℹ️</div>
+            <div>
+              <div class="alert-title">判定について</div>
+              <div class="alert-body">昼食以外の品目が含まれていても、昼食分だけを自動で抽出して補助対象にします。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item" onclick="gotoPage('home')"><span class="nav-icon">🏠</span><span class="nav-label-text">ホーム</span></div>
+        <div class="nav-item active" onclick="gotoPage('upload')"><span class="nav-icon">📷</span><span class="nav-label-text">提出</span></div>
+        <div class="nav-item" onclick="gotoPage('history')"><span class="nav-icon">📋</span><span class="nav-label-text">履歴</span></div>
+      </div>
+    </div>
+
+    <!-- 申請履歴 -->
+    <div id="page-history" class="page">
+      <div class="header"><div class="header-title">申請履歴</div><div class="header-sub">2026年4月</div></div>
+      <div class="scroll-body">
+        <div class="section">
+          <div class="history-item">
+            <div class="history-icon">🍱</div>
+            <div class="history-info"><div class="history-name">セブン-イレブン</div><div class="history-date">4月18日 · 昼食: ¥840 / 対象外: ¥400</div></div>
+            <div class="history-right"><div class="history-amount">¥840</div><div class="history-badge"><span class="badge badge-green">承認済み</span></div></div>
+          </div>
+          <div class="history-item">
+            <div class="history-icon">🍜</div>
+            <div class="history-info"><div class="history-name">松屋</div><div class="history-date">4月17日 · 牛めし並</div></div>
+            <div class="history-right"><div class="history-amount">¥680</div><div class="history-badge"><span class="badge badge-green">承認済み</span></div></div>
+          </div>
+          <div class="history-item">
+            <div class="history-icon">💳</div>
+            <div class="history-info"><div class="history-name">iD決済</div><div class="history-date">4月16日 · 未提出</div></div>
+            <div class="history-right"><div class="history-amount">¥1,240</div><div class="history-badge"><span class="badge badge-amber">未提出</span></div></div>
+          </div>
+          <div class="history-item">
+            <div class="history-icon">🍔</div>
+            <div class="history-info"><div class="history-name">マクドナルド</div><div class="history-date">4月14日</div></div>
+            <div class="history-right"><div class="history-amount">¥890</div><div class="history-badge"><span class="badge badge-blue">確認中</span></div></div>
+          </div>
+          <div class="history-item">
+            <div class="history-icon">🍱</div>
+            <div class="history-info"><div class="history-name">ローソン</div><div class="history-date">4月11日 · お弁当・飲料</div></div>
+            <div class="history-right"><div class="history-amount">¥720</div><div class="history-badge"><span class="badge badge-green">承認済み</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item" onclick="gotoPage('home')"><span class="nav-icon">🏠</span><span class="nav-label-text">ホーム</span></div>
+        <div class="nav-item" onclick="gotoPage('upload')"><span class="nav-icon">📷</span><span class="nav-label-text">提出</span></div>
+        <div class="nav-item active" onclick="gotoPage('history')"><span class="nav-icon">📋</span><span class="nav-label-text">履歴</span></div>
+      </div>
+    </div>
+
+    <!-- カード登録 -->
+    <div id="page-card" class="page">
+      <div class="header"><div class="header-title">カード登録</div></div>
+      <div class="scroll-body">
+        <div class="section">
+          <div class="card-register">
+            <div class="card-register-icon">💳</div>
+            <div class="card-register-title">カードIDを登録してください</div>
+            <div class="card-register-sub">カード台紙に記載の16桁IDを入力してください。<br>登録後、翌月から補助残高が付与されます。</div>
+          </div>
+          <input class="card-id-input" type="text" placeholder="0000-0000-0000-0000" maxlength="19">
+          <div class="card-register-hint">カードが届いていない場合は人事部にご連絡ください</div>
+          <button class="btn btn-primary btn-full">登録する</button>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item" onclick="gotoPage('home')"><span class="nav-icon">🏠</span><span class="nav-label-text">ホーム</span></div>
+        <div class="nav-item" onclick="gotoPage('upload')"><span class="nav-icon">📷</span><span class="nav-label-text">提出</span></div>
+        <div class="nav-item" onclick="gotoPage('history')"><span class="nav-icon">📋</span><span class="nav-label-text">履歴</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function gotoPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>昼食補助 — 人事管理画面</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F7F6F3;
+    --surface: #FFFFFF;
+    --border: #E5E3DC;
+    --border-strong: #C8C5BC;
+    --text: #1A1916;
+    --text-sub: #6B6860;
+    --text-hint: #A09D96;
+    --blue: #185FA5;
+    --blue-bg: #E6F1FB;
+    --blue-text: #0C447C;
+    --green: #3B6D11;
+    --green-bg: #EAF3DE;
+    --amber: #854F0B;
+    --amber-bg: #FAEEDA;
+    --red: #A32D2D;
+    --red-bg: #FCEBEB;
+    --purple: #534AB7;
+    --purple-bg: #EEEDFE;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; min-height: 100vh; }
+
+  .shell { display: flex; height: 100vh; overflow: hidden; }
+
+  .sidebar { width: 200px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidebar-logo { padding: 20px 16px 16px; border-bottom: 1px solid var(--border); }
+  .sidebar-logo-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .sidebar-logo-sub { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+  .sidebar-nav { padding: 12px 8px; flex: 1; overflow-y: auto; }
+  .nav-label { font-size: 10px; font-weight: 600; color: var(--text-hint); letter-spacing: .08em; padding: 0 8px; margin: 12px 0 4px; text-transform: uppercase; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: var(--radius-sm); font-size: 13px; color: var(--text-sub); cursor: pointer; transition: background .15s; margin-bottom: 1px; }
+  .nav-item:hover { background: var(--bg); color: var(--text); }
+  .nav-item.active { background: var(--blue-bg); color: var(--blue-text); font-weight: 500; }
+  .nav-icon { font-size: 15px; width: 20px; text-align: center; }
+  .nav-badge { margin-left: auto; background: var(--amber-bg); color: var(--amber); font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 99px; }
+  .sidebar-footer { padding: 12px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-sub); }
+
+  .main { flex: 1; overflow-y: auto; background: var(--bg); }
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+  .topbar-title { font-size: 16px; font-weight: 600; }
+  .topbar-actions { display: flex; gap: 8px; align-items: center; }
+  .content { padding: 24px; }
+
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 13px; font-family: inherit; border-radius: var(--radius-sm); cursor: pointer; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); font-weight: 500; transition: background .15s; }
+  .btn:hover { background: var(--bg); }
+  .btn-primary { background: var(--text); color: #fff; border-color: var(--text); }
+  .btn-primary:hover { opacity: .85; }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
+  .btn-ghost { border-color: transparent; }
+  .btn-danger { color: var(--red); border-color: #F7C1C1; background: var(--red-bg); }
+
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .metric { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .metric-label { font-size: 11px; color: var(--text-sub); margin-bottom: 6px; }
+  .metric-value { font-size: 24px; font-weight: 600; line-height: 1; }
+  .metric-value.blue { color: var(--blue); }
+  .metric-value.amber { color: var(--amber); }
+  .metric-value.red { color: var(--red); }
+  .metric-value.green { color: var(--green); }
+  .metric-sub { font-size: 11px; color: var(--text-hint); margin-top: 4px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 16px; overflow: hidden; }
+  .card-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .card-title { font-size: 13px; font-weight: 600; }
+  .card-body { padding: 18px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; font-size: 11px; font-weight: 600; color: var(--text-sub); padding: 10px 12px; border-bottom: 1px solid var(--border); letter-spacing: .04em; text-transform: uppercase; }
+  td { padding: 11px 12px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #FAFAF8; }
+
+  .badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 99px; }
+  .badge-blue { background: var(--blue-bg); color: var(--blue-text); }
+  .badge-green { background: var(--green-bg); color: var(--green); }
+  .badge-amber { background: var(--amber-bg); color: var(--amber); }
+  .badge-red { background: var(--red-bg); color: var(--red); }
+  .badge-gray { background: var(--bg); color: var(--text-sub); border: 1px solid var(--border); }
+  .badge-purple { background: var(--purple-bg); color: var(--purple); }
+
+  .receipt-item { display: flex; gap: 12px; align-items: flex-start; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+  .receipt-item:last-child { border-bottom: none; }
+  .receipt-thumb { width: 48px; height: 48px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .receipt-info { flex: 1; min-width: 0; }
+  .receipt-name { font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+  .receipt-meta { font-size: 12px; color: var(--text-sub); margin-top: 3px; }
+  .receipt-breakdown { font-size: 12px; margin-top: 4px; padding: 6px 10px; background: var(--bg); border-radius: var(--radius-sm); }
+  .receipt-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+
+  .progress-bar { height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--blue); border-radius: 3px; }
+
+  input[type=text], input[type=number], input[type=email], select {
+    font-family: inherit; font-size: 13px; padding: 8px 12px;
+    border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--text); width: 100%;
+    transition: border .15s;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--blue); }
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-size: 12px; font-weight: 500; color: var(--text-sub); margin-bottom: 5px; display: block; }
+  .form-hint { font-size: 11px; color: var(--text-hint); margin-top: 4px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .validation-ok { font-size: 11px; color: var(--green); margin-top: 4px; }
+  .validation-err { font-size: 11px; color: var(--red); margin-top: 4px; }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border); color: var(--text-sub); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+
+  .employment-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .employment-name { font-size: 14px; font-weight: 600; }
+  .employment-amount { font-size: 22px; font-weight: 600; color: var(--blue); }
+  .employment-meta { font-size: 12px; color: var(--text-sub); }
+  .employment-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+
+  .deduction-summary { background: linear-gradient(135deg, #1A3A6B 0%, #185FA5 100%); color: white; border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+  .deduction-summary-title { font-size: 12px; opacity: .7; margin-bottom: 4px; }
+  .deduction-summary-value { font-size: 28px; font-weight: 600; }
+  .deduction-summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+  .deduction-summary-item { background: rgba(255,255,255,.12); border-radius: var(--radius-sm); padding: 10px 12px; }
+  .deduction-summary-item-label { font-size: 11px; opacity: .7; }
+  .deduction-summary-item-value { font-size: 16px; font-weight: 600; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-title">昼食補助管理</div>
+      <div class="sidebar-logo-sub">人事管理画面</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-label">メイン</div>
+      <div class="nav-item active" onclick="nav('dashboard', this)"><span class="nav-icon">📊</span>ダッシュボード</div>
+      <div class="nav-item" onclick="nav('employees', this)"><span class="nav-icon">👥</span>従業員管理</div>
+      <div class="nav-item" onclick="nav('receipts', this)"><span class="nav-icon">🧾</span>レシート確認<span class="nav-badge">3</span></div>
+      <div class="nav-item" onclick="nav('deduction', this)"><span class="nav-icon">💴</span>天引き計算</div>
+      <div class="nav-label">設定</div>
+      <div class="nav-item" onclick="nav('employment', this)"><span class="nav-icon">⚙️</span>雇用形態マスタ</div>
+      <div class="nav-item" onclick="nav('distribution', this)"><span class="nav-icon">💰</span>残高配布</div>
+      <div class="nav-item" onclick="nav('settings', this)"><span class="nav-icon">🔧</span>システム設定</div>
+    </div>
+    <div class="sidebar-footer">人事部 管理者</div>
+  </div>
+
+  <div class="main">
+    <!-- ダッシュボード -->
+    <div id="page-dashboard" class="page active">
+      <div class="topbar"><div class="topbar-title">ダッシュボード</div><div style="font-size:12px;color:var(--text-sub);">2026年4月</div></div>
+      <div class="content">
+        <div class="metrics">
+          <div class="metric"><div class="metric-label">補助対象従業員</div><div class="metric-value blue">124名</div><div class="metric-sub">カード未登録 7名</div></div>
+          <div class="metric"><div class="metric-label">要確認レシート</div><div class="metric-value amber">3件</div><div class="metric-sub">今月提出済み 89件</div></div>
+          <div class="metric"><div class="metric-label">今月配布総額</div><div class="metric-value green">¥532,000</div><div class="metric-sub">雇用形態別自動算出</div></div>
+          <div class="metric"><div class="metric-label">天引き予定総額</div><div class="metric-value red">¥42,800</div><div class="metric-sub">確定まで 4日</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">レシート提出状況</div><div style="font-size:12px;color:var(--text-sub);">〆切: 4月25日（残4日）</div></div>
+          <div class="card-body">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;"><span>提出済み 89件</span><span style="font-weight:600;">72%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:72%"></div></div>
+            <div style="font-size:11px;color:var(--text-sub);margin-top:5px;">未提出 35件 — 期限を過ぎると全額天引きになります</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">要確認レシート</div><div><button class="btn btn-sm btn-primary">一括承認</button></div></div>
+          <div class="receipt-item">
+            <div class="receipt-thumb">🧾</div>
+            <div class="receipt-info">
+              <div class="receipt-name">山田 太郎 <span class="badge badge-amber">要確認</span></div>
+              <div class="receipt-meta">4月18日 · iD決済 ¥1,240 · AIスコア 62%</div>
+              <div class="receipt-breakdown">昼食対象: <strong>¥840</strong>（サンドイッチ・飲料）　対象外: ¥400（日用品）</div>
+            </div>
+            <div class="receipt-actions"><button class="btn btn-sm btn-primary">承認</button><button class="btn btn-sm">否認</button></div>
+          </div>
+          <div class="receipt-item">
+            <div class="receipt-thumb">🧾</div>
+            <div class="receipt-info">
+              <div class="receipt-name">鈴木 花子 <span class="badge badge-amber">要確認</span></div>
+              <div class="receipt-meta">4月17日 · iD決済 ¥2,100 · AIスコア 55%</div>
+              <div class="receipt-breakdown">昼食対象: <strong>¥2,100</strong>（金額高めのため要確認）</div>
+            </div>
+            <div class="receipt-actions"><button class="btn btn-sm btn-primary">承認</button><button class="btn btn-sm">否認</button></div>
+          </div>
+          <div class="receipt-item">
+            <div class="receipt-thumb">🧾</div>
+            <div class="receipt-info">
+              <div class="receipt-name">田中 一郎 <span class="badge badge-amber">要確認</span></div>
+              <div class="receipt-meta">4月16日 · iD決済 ¥980 · AIスコア 58%</div>
+              <div class="receipt-breakdown">品目読み取り不鮮明 — レシート画像を確認してください</div>
+            </div>
+            <div class="receipt-actions"><button class="btn btn-sm btn-primary">承認</button><button class="btn btn-sm">否認</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 従業員管理 -->
+    <div id="page-employees" class="page">
+      <div class="topbar"><div class="topbar-title">従業員管理</div><div class="topbar-actions"><button class="btn btn-primary btn-sm">+ 従業員追加</button></div></div>
+      <div class="content">
+        <div class="card" style="padding:0;">
+          <table>
+            <thead><tr>
+              <th style="padding-left:18px;">氏名</th><th>社員番号</th><th>雇用形態</th><th>補助額</th><th>カード登録</th><th>ステータス</th><th></th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="padding-left:18px;font-weight:500;">山田 太郎</td><td style="color:var(--text-sub);">001234</td><td>正社員</td><td style="font-weight:600;">¥5,000</td><td><span class="badge badge-green">登録済み</span></td><td><span class="badge badge-green">有効</span></td><td><button class="btn btn-sm btn-ghost">編集</button></td></tr>
+              <tr><td style="padding-left:18px;font-weight:500;">鈴木 花子</td><td style="color:var(--text-sub);">001235</td><td>正社員</td><td style="font-weight:600;">¥5,000</td><td><span class="badge badge-green">登録済み</span></td><td><span class="badge badge-green">有効</span></td><td><button class="btn btn-sm btn-ghost">編集</button></td></tr>
+              <tr><td style="padding-left:18px;font-weight:500;">佐藤 次郎</td><td style="color:var(--text-sub);">001236</td><td>契約社員</td><td style="font-weight:600;">¥3,000</td><td><span class="badge badge-amber">未登録</span></td><td><span class="badge badge-gray">待機中</span></td><td><button class="btn btn-sm btn-ghost">編集</button></td></tr>
+              <tr><td style="padding-left:18px;font-weight:500;">田中 一郎</td><td style="color:var(--text-sub);">001237</td><td>正社員</td><td style="font-weight:600;">¥5,000</td><td><span class="badge badge-green">登録済み</span></td><td><span class="badge badge-green">有効</span></td><td><button class="btn btn-sm btn-ghost">編集</button></td></tr>
+              <tr><td style="padding-left:18px;font-weight:500;">伊藤 美咲</td><td style="color:var(--text-sub);">001238</td><td>アルバイト</td><td style="font-weight:600;">¥1,500</td><td><span class="badge badge-amber">未登録</span></td><td><span class="badge badge-gray">待機中</span></td><td><button class="btn btn-sm btn-ghost">編集</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- レシート確認 -->
+    <div id="page-receipts" class="page">
+      <div class="topbar"><div class="topbar-title">レシート確認</div><div class="topbar-actions"><select style="width:140px;"><option>要確認のみ</option><option>すべて</option><option>承認済み</option></select><button class="btn btn-sm btn-primary">一括承認</button></div></div>
+      <div class="content">
+        <div class="card" style="padding:0;">
+          <div class="receipt-item">
+            <div class="receipt-thumb">🧾</div>
+            <div class="receipt-info">
+              <div class="receipt-name">山田 太郎 <span class="badge badge-amber">要確認 62%</span></div>
+              <div class="receipt-meta">4月18日 · iD決済 ¥1,240</div>
+              <div class="receipt-breakdown">昼食対象: <strong>¥840</strong>（サンドイッチ・お茶）　対象外: ¥400（シャンプー）</div>
+            </div>
+            <div class="receipt-actions"><button class="btn btn-sm btn-primary">承認</button><button class="btn btn-sm">否認</button></div>
+          </div>
+          <div class="receipt-item">
+            <div class="receipt-thumb">🧾</div>
+            <div class="receipt-info">
+              <div class="receipt-name">佐々木 健 <span class="badge badge-green">自動承認 94%</span></div>
+              <div class="receipt-meta">4月18日 · iD決済 ¥890</div>
+              <div class="receipt-breakdown">昼食対象: <strong>¥890</strong>（ランチセット）</div>
+            </div>
+            <div class="receipt-actions"><button class="btn btn-sm btn-ghost">取消</button></div>
+          </div>
+          <div class="receipt-item">
+            <div class="receipt-thumb">🧾</div>
+            <div class="receipt-info">
+              <div class="receipt-name">鈴木 花子 <span class="badge badge-amber">要確認 55%</span></div>
+              <div class="receipt-meta">4月17日 · iD決済 ¥2,100</div>
+              <div class="receipt-breakdown">昼食対象: <strong>¥2,100</strong>（金額高めのため確認）</div>
+            </div>
+            <div class="receipt-actions"><button class="btn btn-sm btn-primary">承認</button><button class="btn btn-sm">否認</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 天引き計算 -->
+    <div id="page-deduction" class="page">
+      <div class="topbar"><div class="topbar-title">天引き計算（4月分）</div><div class="topbar-actions"><button class="btn btn-sm">CSV出力</button><button class="btn btn-sm btn-primary">月次締め処理</button></div></div>
+      <div class="content">
+        <div class="deduction-summary">
+          <div class="deduction-summary-title">天引き合計（確定予定）</div>
+          <div class="deduction-summary-value">¥42,800</div>
+          <div class="deduction-summary-grid">
+            <div class="deduction-summary-item"><div class="deduction-summary-item-label">配布総額</div><div class="deduction-summary-item-value">¥532,000</div></div>
+            <div class="deduction-summary-item"><div class="deduction-summary-item-label">昼食利用総額</div><div class="deduction-summary-item-value">¥487,200</div></div>
+            <div class="deduction-summary-item"><div class="deduction-summary-item-label">未提出分</div><div class="deduction-summary-item-value">¥31,500</div></div>
+          </div>
+        </div>
+        <div class="card" style="padding:0;">
+          <table>
+            <thead><tr>
+              <th style="padding-left:18px;">氏名</th><th>雇用形態</th><th>補助額</th><th>昼食利用</th><th>未提出分</th><th>従業員負担(50%)</th><th>天引き額</th><th>状態</th>
+            </tr></thead>
+            <tbody>
+              <tr>
+                <td style="padding-left:18px;font-weight:500;">山田 太郎</td><td>正社員</td><td>¥5,000</td><td>¥8,400</td><td>¥0</td><td>¥4,200</td>
+                <td style="font-weight:600;color:var(--text);">¥4,200</td><td><span class="badge badge-blue">計算中</span></td>
+              </tr>
+              <tr>
+                <td style="padding-left:18px;font-weight:500;">鈴木 花子</td><td>正社員</td><td>¥5,000</td><td>¥12,400</td><td>¥0</td><td>¥5,000+¥2,400</td>
+                <td style="font-weight:600;color:var(--red);">¥7,400</td><td><span class="badge badge-blue">計算中</span></td>
+              </tr>
+              <tr>
+                <td style="padding-left:18px;font-weight:500;">田中 一郎</td><td>正社員</td><td>¥5,000</td><td>¥3,600</td><td>¥1,980</td><td>¥1,800</td>
+                <td style="font-weight:600;color:var(--red);">¥3,780</td><td><span class="badge badge-amber">未提出あり</span></td>
+              </tr>
+              <tr>
+                <td style="padding-left:18px;font-weight:500;">伊藤 美咲</td><td>アルバイト</td><td>¥1,500</td><td>¥4,200</td><td>¥0</td><td>¥1,500+¥2,700</td>
+                <td style="font-weight:600;color:var(--red);">¥4,200</td><td><span class="badge badge-green">確定済み</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="font-size:11px;color:var(--text-sub);padding:4px;">
+          ※ 天引き額 = 従業員負担分（利用額×50%）+ 補助上限超過分 + 未提出分
+        </div>
+      </div>
+    </div>
+
+    <!-- 雇用形態マスタ -->
+    <div id="page-employment" class="page">
+      <div class="topbar"><div class="topbar-title">雇用形態マスタ</div><div class="topbar-actions"><button class="btn btn-sm btn-primary">+ 雇用形態追加</button></div></div>
+      <div class="content">
+        <div style="background:var(--blue-bg);border:1px solid #B5D4F4;border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--blue-text);">
+          非課税要件: 会社補助額 ≤ ¥7,500 かつ 補助率 ≥ 50% を満たす必要があります。条件を外れる設定はエラーになります。
+        </div>
+        <div class="employment-grid">
+          <div class="employment-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div class="employment-name">正社員</div>
+              <span class="badge badge-green">非課税 ✓</span>
+            </div>
+            <div class="employment-amount">¥5,000<span style="font-size:14px;font-weight:400;color:var(--text-sub);">/月</span></div>
+            <div class="employment-meta">従業員負担率: 50%　対象: 98名</div>
+            <div style="display:flex;gap:6px;"><button class="btn btn-sm btn-ghost">編集</button></div>
+          </div>
+          <div class="employment-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div class="employment-name">契約社員</div>
+              <span class="badge badge-green">非課税 ✓</span>
+            </div>
+            <div class="employment-amount">¥3,000<span style="font-size:14px;font-weight:400;color:var(--text-sub);">/月</span></div>
+            <div class="employment-meta">従業員負担率: 50%　対象: 18名</div>
+            <div style="display:flex;gap:6px;"><button class="btn btn-sm btn-ghost">編集</button></div>
+          </div>
+          <div class="employment-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div class="employment-name">アルバイト</div>
+              <span class="badge badge-green">非課税 ✓</span>
+            </div>
+            <div class="employment-amount">¥1,500<span style="font-size:14px;font-weight:400;color:var(--text-sub);">/月</span></div>
+            <div class="employment-meta">従業員負担率: 50%　対象: 8名</div>
+            <div style="display:flex;gap:6px;"><button class="btn btn-sm btn-ghost">編集</button></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">補助額シミュレーター</div></div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">会社補助額（円）</label>
+                <input type="number" id="sim-company" value="5000" max="7500" oninput="simulate()">
+                <div class="form-hint">上限: ¥7,500</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">月間利用額（例）</label>
+                <input type="number" id="sim-usage" value="10000" oninput="simulate()">
+              </div>
+            </div>
+            <div id="sim-result" style="background:var(--bg);border-radius:var(--radius-sm);padding:12px;font-size:13px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 残高配布 -->
+    <div id="page-distribution" class="page">
+      <div class="topbar"><div class="topbar-title">残高配布</div><div class="topbar-actions"><button class="btn btn-sm btn-primary">今月分を配布実行</button></div></div>
+      <div class="content">
+        <div class="card">
+          <div class="card-header"><div class="card-title">今月の配布予定</div></div>
+          <div class="card-body">
+            <table>
+              <thead><tr><th>雇用形態</th><th>対象人数</th><th>補助額/人</th><th>配布総額</th><th>状態</th></tr></thead>
+              <tbody>
+                <tr><td style="font-weight:500;">正社員</td><td>98名</td><td>¥5,000</td><td style="font-weight:600;">¥490,000</td><td><span class="badge badge-green">配布済み</span></td></tr>
+                <tr><td style="font-weight:500;">契約社員</td><td>18名</td><td>¥3,000</td><td style="font-weight:600;">¥54,000</td><td><span class="badge badge-green">配布済み</span></td></tr>
+                <tr><td style="font-weight:500;">アルバイト</td><td>8名</td><td>¥1,500</td><td style="font-weight:600;">¥12,000</td><td><span class="badge badge-green">配布済み</span></td></tr>
+                <tr><td style="font-weight:500; padding-top:12px;">合計</td><td>124名</td><td>—</td><td style="font-weight:600;font-size:15px;">¥556,000</td><td></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- システム設定 -->
+    <div id="page-settings" class="page">
+      <div class="topbar"><div class="topbar-title">システム設定</div><div class="topbar-actions"><button class="btn btn-sm btn-primary">保存</button></div></div>
+      <div class="content">
+        <div class="card">
+          <div class="card-header"><div class="card-title">基本設定</div></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">レシート提出期限（日）</label>
+              <input type="number" value="25" style="width:100px;">
+              <div class="form-hint">毎月この日の23:59に締め切ります</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">AI自動承認 信頼度閾値（%）</label>
+              <input type="number" value="80" style="width:100px;">
+              <div class="form-hint">この値以上のスコアで自動承認されます</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">按分計算方式</label>
+              <select style="width:260px;">
+                <option>日割り（入社日・退職日ベース）</option>
+                <option>月割り（入社月は全額）</option>
+                <option>月割り（入社月は0円）</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function nav(page, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function simulate() {
+  const company = parseInt(document.getElementById('sim-company').value) || 0;
+  const usage = parseInt(document.getElementById('sim-usage').value) || 0;
+  const el = document.getElementById('sim-result');
+  if (company > 7500) {
+    el.innerHTML = '<span style="color:var(--red);font-weight:500;">⚠ エラー: 会社補助額は¥7,500を超えられません（非課税要件違反）</span>';
+    return;
+  }
+  const maxUsageForSubsidy = company * 2;
+  const subsidizedUsage = Math.min(usage, maxUsageForSubsidy);
+  const employeePay = Math.min(subsidizedUsage * 0.5, company);
+  const excess = Math.max(0, usage - maxUsageForSubsidy);
+  const deduction = employeePay + excess;
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+      <div><div style="font-size:11px;color:var(--text-sub);margin-bottom:2px;">会社負担</div><div style="font-size:16px;font-weight:600;color:var(--green);">¥${company.toLocaleString()}</div></div>
+      <div><div style="font-size:11px;color:var(--text-sub);margin-bottom:2px;">従業員負担（50%）</div><div style="font-size:16px;font-weight:600;">¥${employeePay.toLocaleString()}</div></div>
+      <div><div style="font-size:11px;color:var(--text-sub);margin-bottom:2px;">天引き額合計</div><div style="font-size:16px;font-weight:600;color:var(--red);">¥${deduction.toLocaleString()}</div></div>
+    </div>
+    ${excess > 0 ? `<div style="margin-top:8px;font-size:11px;color:var(--amber);">補助上限超過: ¥${excess.toLocaleString()}（超過分は全額天引き）</div>` : ''}
+    <div style="margin-top:6px;font-size:11px;color:var(--green);">✓ 非課税要件を満たしています</div>
+  `;
+}
+simulate();
+</script>
+</body>
+</html>
