@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ランチケ 従業員ポータル（モック）</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue-600: #2563eb;
+    --blue-700: #1d4ed8;
+    --blue-800: #1e40af;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-700: #374151;
+    --gray-900: #111827;
+    --green-600: #059669;
+    --green-700: #15803d;
+    --green-800: #166534;
+    --red-600: #dc2626;
+    --red-800: #991b1b;
+    --amber-500: #f59e0b;
+    --amber-400: #fbbf24;
+    --amber-800: #92400e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-900);
+    -webkit-font-smoothing: antialiased;
+  }
+  #app {
+    max-width: 430px;
+    margin: 0 auto;
+    min-height: 100vh;
+    position: relative;
+    background: var(--gray-50);
+  }
+  .page { display: none; padding-bottom: 80px; }
+  .page.active { display: block; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Bottom Nav */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 430px;
+    display: flex; justify-content: space-around; align-items: center;
+    background: #fff; border-top: 1px solid var(--gray-200);
+    padding: 6px 0 env(safe-area-inset-bottom, 8px);
+    z-index: 100;
+  }
+  .nav-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    background: none; border: none; padding: 4px 12px; cursor: pointer;
+    color: var(--gray-400); font-size: 10px; font-weight: 500;
+    font-family: 'Noto Sans JP', sans-serif; transition: color 0.15s;
+  }
+  .nav-btn.active { color: var(--blue-600); font-weight: 700; }
+  .nav-btn .nav-icon { font-size: 20px; }
+
+  /* Header */
+  .header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; background: #fff;
+    border-bottom: 1px solid var(--gray-200);
+    position: sticky; top: 0; z-index: 50;
+  }
+  .header-back { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--blue-600); padding: 0; }
+  .header-title { font-size: 16px; font-weight: 700; }
+
+  /* Card */
+  .card {
+    background: #fff; border-radius: 14px; padding: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  /* Utility */
+  .mb-8 { margin-bottom: 8px; }
+  .mb-12 { margin-bottom: 12px; }
+  .mb-16 { margin-bottom: 16px; }
+  .mb-20 { margin-bottom: 20px; }
+  .p-16 { padding: 16px; }
+  .text-center { text-align: center; }
+
+  /* Buttons */
+  .btn-primary {
+    padding: 12px 24px; background: var(--blue-600); color: #fff;
+    border: none; border-radius: 10px; font-size: 14px; font-weight: 700;
+    cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
+    transition: background 0.15s;
+  }
+  .btn-primary:active { background: var(--blue-700); }
+  .btn-secondary {
+    padding: 12px 24px; background: var(--gray-100); color: var(--gray-700);
+    border: none; border-radius: 10px; font-size: 14px; font-weight: 600;
+    cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
+  }
+  .btn-outline {
+    padding: 10px; background: none; border: 1px solid var(--gray-200);
+    border-radius: 8px; color: var(--blue-600); font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: 'Noto Sans JP', sans-serif; width: 100%;
+  }
+  .btn-danger {
+    width: 100%; padding: 12px; background: #fee2e2; color: var(--red-800);
+    border: none; border-radius: 10px; font-size: 14px; font-weight: 700;
+    cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
+  }
+  .btn-full { width: 100%; }
+
+  /* Shop chip buttons */
+  .shop-chip {
+    padding: 8px 14px; background: #fff; border: 1px solid var(--gray-200);
+    border-radius: 20px; font-size: 12px; font-weight: 600; color: var(--gray-700);
+    cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
+    transition: all 0.15s;
+  }
+  .shop-chip:active { background: #eff6ff; border-color: #93c5fd; }
+
+  /* Category search button */
+  .cat-search-btn {
+    width: 100%; padding: 12px 14px;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    color: #fff; border: none; border-radius: 10px;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: opacity 0.15s;
+  }
+  .cat-search-btn:active { opacity: 0.85; }
+  .cat-search-hint {
+    font-size: 10px; font-weight: 500; opacity: 0.8;
+  }
+
+  /* Chat */
+  .chat-container { display: flex; flex-direction: column; height: 100vh; }
+  .chat-messages { flex: 1; overflow-y: auto; padding: 16px; background: var(--gray-50); }
+  .chat-bubble {
+    max-width: 80%; padding: 10px 14px; border-radius: 14px;
+    font-size: 13px; line-height: 1.5; margin-bottom: 10px;
+  }
+  .chat-bubble.user { background: var(--blue-600); color: #fff; margin-left: auto; }
+  .chat-bubble.ai { background: #fff; color: var(--gray-700); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .chat-input-bar {
+    display: flex; gap: 8px; padding: 12px 16px;
+    background: #fff; border-top: 1px solid var(--gray-200);
+  }
+  .chat-input {
+    flex: 1; padding: 10px 14px; border: 1px solid var(--gray-200);
+    border-radius: 10px; font-size: 14px; outline: none;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+
+  /* Form */
+  .form-label { font-size: 12px; font-weight: 600; color: var(--gray-700); display: block; margin-bottom: 4px; }
+  .form-input, .form-select, .form-textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--gray-200);
+    border-radius: 8px; font-size: 14px; font-family: 'Noto Sans JP', sans-serif;
+    outline: none; background: #fff;
+  }
+  .form-textarea { resize: vertical; }
+
+  /* Status badges */
+  .badge {
+    font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+    display: inline-block;
+  }
+  .badge-green { background: #dcfce7; color: var(--green-800); }
+  .badge-red { background: #fee2e2; color: var(--red-800); }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  .badge-amber { background: #fef3c7; color: var(--amber-800); }
+
+  /* Receipt item */
+  .receipt-item {
+    margin-bottom: 8px; padding: 12px; border-radius: 14px;
+    background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .receipt-item.approved { border-left: 4px solid #22c55e; }
+  .receipt-item.denied { border-left: 4px solid #ef4444; }
+  .receipt-item.pending { border-left: 4px solid var(--amber-500); }
+
+  /* FAQ */
+  .faq-item { cursor: pointer; margin-bottom: 8px; }
+  .faq-q {
+    padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .faq-arrow { font-size: 16px; color: var(--gray-400); transition: transform 0.2s; }
+  .faq-arrow.open { transform: rotate(180deg); }
+  .faq-a { padding: 0 14px 12px; font-size: 12px; color: var(--gray-500); line-height: 1.6; display: none; }
+  .faq-a.open { display: block; }
+
+  /* History row */
+  .history-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 0; border-bottom: 1px solid var(--gray-100);
+  }
+
+  /* Alert */
+  .alert-warning {
+    width: 100%; padding: 12px 16px; background: #fef3c7; border: 1px solid var(--amber-500);
+    border-radius: 10px; cursor: pointer; text-align: left;
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: 'Noto Sans JP', sans-serif; font-size: 13px; color: var(--amber-800); font-weight: 600;
+  }
+
+  /* More menu item */
+  .more-item {
+    width: 100%; display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px; margin-bottom: 8px; background: #fff;
+    border: 1px solid var(--gray-100); border-radius: 12px; cursor: pointer;
+    text-align: left; font-family: 'Noto Sans JP', sans-serif;
+  }
+  .more-item:active { background: var(--gray-50); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== HOME ===== -->
+  <div id="page-home" class="page active">
+    <div class="p-16">
+      <div style="display:flex;align-items:center;justify-content:space-between" class="mb-20">
+        <div>
+          <div style="font-size:13px;color:var(--gray-500)">おはようございます</div>
+          <div style="font-size:18px;font-weight:700">山田 太郎</div>
+        </div>
+        <div style="width:40px;height:40px;border-radius:20px;background:linear-gradient(135deg,#3b82f6,#2563eb);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px">山</div>
+      </div>
+
+      <div class="card mb-16" style="background:linear-gradient(135deg,#1e40af,#3b82f6);color:#fff">
+        <div style="font-size:11px;opacity:0.8;margin-bottom:4px">iD残高</div>
+        <div style="font-size:32px;font-weight:800;letter-spacing:-1px">¥5,200</div>
+        <div style="font-size:11px;opacity:0.7;margin-top:2px">カード: 4980-XXXX-XXXX-1234</div>
+        <div style="display:flex;gap:12px;margin-top:16px;border-top:1px solid rgba(255,255,255,0.2);padding-top:12px">
+          <div style="flex:1">
+            <div style="font-size:10px;opacity:0.7">今月の利用額</div>
+            <div style="font-size:18px;font-weight:700">¥4,970</div>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:10px;opacity:0.7">天引き予定額</div>
+            <div style="font-size:18px;font-weight:700">¥3,150</div>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:10px;opacity:0.7">未提出</div>
+            <div style="font-size:18px;font-weight:700;color:#fbbf24">2件</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="alert-warning mb-16" onclick="showPage('receipt')">
+        <span>⚠ 未提出のレシートが2件あります</span>
+        <span>→</span>
+      </button>
+
+      <div style="font-size:13px;font-weight:700;color:var(--gray-700)" class="mb-8">直近の利用履歴</div>
+      <div class="history-row">
+        <div><div style="font-size:13px;font-weight:600">セブンイレブン 渋谷店</div><div style="font-size:11px;color:var(--gray-400)">04/22</div></div>
+        <div style="text-align:right"><div style="font-size:14px;font-weight:700">-¥680</div><div style="font-size:10px;font-weight:600;color:var(--blue-600)">提出済</div></div>
+      </div>
+      <div class="history-row">
+        <div><div style="font-size:13px;font-weight:600">マクドナルド 表参道店</div><div style="font-size:11px;color:var(--gray-400)">04/21</div></div>
+        <div style="text-align:right"><div style="font-size:14px;font-weight:700">-¥750</div><div style="font-size:10px;font-weight:600;color:var(--blue-600)">提出済</div></div>
+      </div>
+      <div class="history-row">
+        <div><div style="font-size:13px;font-weight:600">ガスト 新宿店</div><div style="font-size:11px;color:var(--gray-400)">04/18</div></div>
+        <div style="text-align:right"><div style="font-size:14px;font-weight:700">-¥890</div><div style="font-size:10px;font-weight:600;color:var(--red-600)">未提出</div></div>
+      </div>
+      <button class="btn-outline" style="margin-top:8px" onclick="showPage('history')">すべての履歴を見る</button>
+    </div>
+  </div>
+
+  <!-- ===== RECEIPT ===== -->
+  <div id="page-receipt" class="page">
+    <div class="header"><button class="header-back" onclick="showPage('home')">←</button><span class="header-title">レシートアップロード</span></div>
+    <div class="p-16">
+      <div id="receipt-upload" class="card text-center" style="padding:32px">
+        <div style="font-size:48px;margin-bottom:12px">📷</div>
+        <div style="font-size:14px;font-weight:600;color:var(--gray-700);margin-bottom:8px">レシートを撮影・選択</div>
+        <div style="font-size:12px;color:var(--gray-400);margin-bottom:20px">カメラで撮影するか、ギャラリーから選択してください</div>
+        <button class="btn-primary" onclick="simulateUpload()">カメラを起動</button>
+        <button class="btn-secondary" style="margin-left:8px" onclick="simulateUpload()">ギャラリー</button>
+      </div>
+      <div id="receipt-result" style="display:none">
+        <div class="card mb-12" style="background:#f0fdf4;border:1px solid #86efac;padding:12px">
+          <div style="font-size:13px;font-weight:700;color:var(--green-800);margin-bottom:4px">✓ AI解析完了</div>
+          <div style="font-size:11px;color:var(--green-700)">店舗: セブンイレブン（正規化済み）</div>
+        </div>
+        <div style="font-size:13px;font-weight:700;color:var(--gray-700)" class="mb-8">品目判定結果</div>
+        <div class="receipt-item approved">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><div style="font-size:13px;font-weight:600">幕の内弁当</div><div style="font-size:10px;font-weight:600;color:var(--green-600);margin-top:2px">✅ 自動承認（パターン一致）</div></div>
+            <div style="font-size:14px;font-weight:700">¥550</div>
+          </div>
+        </div>
+        <div class="receipt-item approved">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><div style="font-size:13px;font-weight:600">お茶 500ml</div><div style="font-size:10px;font-weight:600;color:var(--green-600);margin-top:2px">✅ 自動承認（パターン一致）</div></div>
+            <div style="font-size:14px;font-weight:700">¥150</div>
+          </div>
+        </div>
+        <div class="receipt-item denied">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><div style="font-size:13px;font-weight:600">タバコ</div><div style="font-size:10px;font-weight:600;color:var(--red-600);margin-top:2px">❌ 自動否認（NG品目）</div></div>
+            <div style="font-size:14px;font-weight:700">¥600</div>
+          </div>
+        </div>
+        <div class="receipt-item pending">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><div style="font-size:13px;font-weight:600">プロテインバー</div><div style="font-size:10px;font-weight:600;color:#d97706;margin-top:2px">⬜ 要確認（人事確認待ち）</div></div>
+            <div style="font-size:14px;font-weight:700">¥300</div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:12px;background:#eff6ff">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:12px;color:#1e40af">昼食対象額（承認済み）</span><span style="font-size:14px;font-weight:700;color:#1e40af">¥700</span></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:12px;color:var(--red-600)">対象外額（否認品目）</span><span style="font-size:14px;font-weight:700;color:var(--red-600)">¥600</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:#d97706">要確認</span><span style="font-size:14px;font-weight:700;color:#d97706">¥300</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== HISTORY ===== -->
+  <div id="page-history" class="page">
+    <div class="header"><button class="header-back" onclick="showPage('home')">←</button><span class="header-title">利用履歴</span></div>
+    <div class="p-16">
+      <div class="history-row"><div><div style="font-size:13px;font-weight:600">セブンイレブン 渋谷店</div><div style="font-size:11px;color:var(--gray-400)">04/22</div></div><div style="text-align:right"><div style="font-size:14px;font-weight:700">-¥680</div><span class="badge badge-blue">提出済</span></div></div>
+      <div class="history-row"><div><div style="font-size:13px;font-weight:600">マクドナルド 表参道店</div><div style="font-size:11px;color:var(--gray-400)">04/21</div></div><div style="text-align:right"><div style="font-size:14px;font-weight:700">-¥750</div><span class="badge badge-blue">提出済</span></div></div>
+      <div class="history-row"><div><div style="font-size:13px;font-weight:600">ガスト 新宿店</div><div style="font-size:11px;color:var(--gray-400)">04/18</div></div><div style="text-align:right"><div style="font-size:14px;font-weight:700">-¥890</div><span class="badge badge-red">未提出</span></div></div>
+      <div class="history-row"><div><div style="font-size:13px;font-weight:600">ローソン 青山店</div><div style="font-size:11px;color:var(--gray-400)">04/17</div></div><div style="text-align:right"><div style="font-size:14px;font-weight:700">-¥520</div><span class="badge badge-red">未提出</span></div></div>
+      <div class="history-row"><div><div style="font-size:13px;font-weight:600">すき家 六本木店</div><div style="font-size:11px;color:var(--gray-400)">04/16</div></div><div style="text-align:right"><div style="font-size:14px;font-weight:700">-¥650</div><span class="badge badge-green">承認済</span></div></div>
+      <div class="history-row"><div><div style="font-size:13px;font-weight:600">ドトール 赤坂店</div><div style="font-size:11px;color:var(--gray-400)">04/15</div></div><div style="text-align:right"><div style="font-size:14px;font-weight:700">-¥480</div><span class="badge badge-green">承認済</span></div></div>
+    </div>
+  </div>
+
+  <!-- ===== SHOPS ===== -->
+  <div id="page-shops" class="page">
+    <div class="header"><button class="header-back" onclick="showPage('home')">←</button><span class="header-title">使えるお店を探す</span></div>
+    <div class="p-16">
+      <div class="card mb-16" style="background:#eff6ff;padding:12px">
+        <div style="font-size:12px;color:#1e40af;margin-bottom:6px">📍 カテゴリ名タップでまとめて検索、チェーン名タップで個別検索できます</div>
+        <div style="font-size:11px;color:#6b7280;line-height:1.5">※カテゴリ検索ではiD非対応のお店も表示されます。お会計前に「iDで支払えますか？」とご確認ください。チェーン名での検索はiD対応確認済みです。</div>
+      </div>
+
+      <div class="mb-16">
+        <button class="cat-search-btn" onclick="searchMap('コンビニ')">🍱 コンビニ<span class="cat-search-hint">近くのコンビニを検索 →</span></button>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+          <button class="shop-chip" onclick="searchMap('セブンイレブン')">セブンイレブン</button>
+          <button class="shop-chip" onclick="searchMap('ローソン')">ローソン</button>
+          <button class="shop-chip" onclick="searchMap('ファミリーマート')">ファミマ</button>
+          <button class="shop-chip" onclick="searchMap('ミニストップ')">ミニストップ</button>
+        </div>
+      </div>
+      <div class="mb-16">
+        <button class="cat-search-btn" onclick="searchMap('ファストフード')">🍜 ファストフード・牛丼<span class="cat-search-hint">近くのファストフードを検索 →</span></button>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+          <button class="shop-chip" onclick="searchMap('マクドナルド')">マクドナルド</button>
+          <button class="shop-chip" onclick="searchMap('すき家')">すき家</button>
+          <button class="shop-chip" onclick="searchMap('吉野家')">吉野家</button>
+          <button class="shop-chip" onclick="searchMap('松屋')">松屋</button>
+          <button class="shop-chip" onclick="searchMap('モスバーガー')">モスバーガー</button>
+        </div>
+      </div>
+      <div class="mb-16">
+        <button class="cat-search-btn" onclick="searchMap('ファミレス')">🍽️ ファミレス<span class="cat-search-hint">近くのファミレスを検索 →</span></button>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+          <button class="shop-chip" onclick="searchMap('ガスト')">ガスト</button>
+          <button class="shop-chip" onclick="searchMap('ジョナサン')">ジョナサン</button>
+          <button class="shop-chip" onclick="searchMap('サイゼリヤ')">サイゼリヤ</button>
+          <button class="shop-chip" onclick="searchMap('デニーズ')">デニーズ</button>
+        </div>
+      </div>
+      <div class="mb-16">
+        <button class="cat-search-btn" onclick="searchMap('カフェ')">☕ カフェ<span class="cat-search-hint">近くのカフェを検索 →</span></button>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+          <button class="shop-chip" onclick="searchMap('ドトール')">ドトール</button>
+          <button class="shop-chip" onclick="searchMap('タリーズ')">タリーズ</button>
+          <button class="shop-chip" onclick="searchMap('スターバックス')">スタバ</button>
+          <button class="shop-chip" onclick="searchMap('プロント')">プロント</button>
+        </div>
+      </div>
+      <div class="mb-16">
+        <button class="cat-search-btn" onclick="searchMap('定食 ランチ')">🍛 その他チェーン<span class="cat-search-hint">近くのランチを検索 →</span></button>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+          <button class="shop-chip" onclick="searchMap('CoCo壱番屋')">CoCo壱番屋</button>
+          <button class="shop-chip" onclick="searchMap('日高屋')">日高屋</button>
+          <button class="shop-chip" onclick="searchMap('餃子の王将')">餃子の王将</button>
+          <button class="shop-chip" onclick="searchMap('大戸屋')">大戸屋</button>
+        </div>
+      </div>
+      <div class="mb-16">
+        <button class="cat-search-btn" onclick="searchMap('パン テイクアウト 弁当')">🥪 パン・テイクアウト<span class="cat-search-hint">近くのテイクアウトを検索 →</span></button>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+          <button class="shop-chip" onclick="searchMap('サンマルクカフェ')">サンマルクカフェ</button>
+          <button class="shop-chip" onclick="searchMap('ミスタードーナツ')">ミスド</button>
+          <button class="shop-chip" onclick="searchMap('ほっともっと')">ほっともっと</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== HELP ===== -->
+  <div id="page-help" class="page">
+    <div class="header"><button class="header-back" onclick="showPage('home')">←</button><span class="header-title">ヘルプ</span></div>
+    <div class="p-16">
+      <button class="btn-primary btn-full mb-16" style="background:linear-gradient(135deg,#2563eb,#3b82f6);display:flex;align-items:center;justify-content:center;gap:8px" onclick="showPage('chatbot')">
+        🤖 AIチャットに質問する
+      </button>
+      <div style="font-size:14px;font-weight:700;color:var(--gray-700)" class="mb-8">よくある質問</div>
+      <div class="card faq-item mb-8" onclick="toggleFaq(0)"><div class="faq-q"><span style="font-size:13px;font-weight:600">カードの使い方は？</span><span class="faq-arrow" id="faq-arrow-0">▾</span></div><div class="faq-a" id="faq-a-0">iD対応のお店で「iDで支払います」と伝えて、カードをかざすだけです。</div></div>
+      <div class="card faq-item mb-8" onclick="toggleFaq(1)"><div class="faq-q"><span style="font-size:13px;font-weight:600">レシートはいつ撮ればいい？</span><span class="faq-arrow" id="faq-arrow-1">▾</span></div><div class="faq-a" id="faq-a-1">お会計後すぐに撮影してアップロードしてください。月末までに未提出だと全額天引きになります。</div></div>
+      <div class="card faq-item mb-8" onclick="toggleFaq(2)"><div class="faq-q"><span style="font-size:13px;font-weight:600">天引き額はどう決まる？</span><span class="faq-arrow" id="faq-arrow-2">▾</span></div><div class="faq-a" id="faq-a-2">承認された昼食対象額の50%が従業員負担です。補助額を超えた分と否認品目は全額負担になります。</div></div>
+      <div class="card faq-item mb-8" onclick="toggleFaq(3)"><div class="faq-q"><span style="font-size:13px;font-weight:600">残高の有効期限は？</span><span class="faq-arrow" id="faq-arrow-3">▾</span></div><div class="faq-a" id="faq-a-3">チャージから1年間有効です。有効期限が近づくとポータルに通知が表示されます。</div></div>
+      <div class="card faq-item mb-8" onclick="toggleFaq(4)"><div class="faq-q"><span style="font-size:13px;font-weight:600">カードを紛失した場合は？</span><span class="faq-arrow" id="faq-arrow-4">▾</span></div><div class="faq-a" id="faq-a-4">ポータルの「カード停止」からすぐに停止してください。その後、新しいカードIDを登録できます。</div></div>
+      <button class="btn-outline" style="margin-top:16px" onclick="showPage('inquiry')">解決しない場合は人事に問い合わせ →</button>
+    </div>
+  </div>
+
+  <!-- ===== CHATBOT ===== -->
+  <div id="page-chatbot" class="page">
+    <div class="chat-container">
+      <div class="header"><button class="header-back" onclick="showPage('help')">←</button><span class="header-title">AIチャットサポート</span></div>
+      <div class="chat-messages" id="chat-messages">
+        <div style="background:#eff6ff;border-radius:12px;padding:12px;margin-bottom:12px;font-size:12px;color:#1e40af">
+          🤖 ランチケについて何でもお気軽にご質問ください！
+        </div>
+      </div>
+      <div class="chat-input-bar" style="padding-bottom:env(safe-area-inset-bottom, 12px)">
+        <input class="chat-input" id="chat-input" placeholder="質問を入力..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="btn-primary" style="padding:10px 16px" onclick="sendChat()">送信</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== INQUIRY ===== -->
+  <div id="page-inquiry" class="page">
+    <div class="header"><button class="header-back" onclick="showPage('help')">←</button><span class="header-title">問い合わせ</span></div>
+    <div class="p-16">
+      <button class="btn-primary btn-full mb-16" onclick="showPage('inquiry-new')">+ 新規問い合わせ</button>
+      <div style="font-size:13px;font-weight:700;color:var(--gray-700)" class="mb-8">問い合わせ履歴</div>
+      <div class="card mb-8" style="padding:12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:12px;color:var(--gray-500)">04/20 / 残高・天引き</span><span class="badge badge-green">解決済み</span></div>
+        <div style="font-size:13px;font-weight:600">天引き額が想定より多い</div>
+        <div style="margin-top:8px;padding:8px 10px;background:var(--gray-50);border-radius:6px;font-size:11px;color:var(--gray-500);line-height:1.5">💬 4月分は未提出レシート2件が全額天引きとなっております。レシートのアップロードをお願いいたします。</div>
+      </div>
+      <div class="card mb-8" style="padding:12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:12px;color:var(--gray-500)">04/18 / カード関連</span><span class="badge badge-amber">対応中</span></div>
+        <div style="font-size:13px;font-weight:600">カードが反応しない</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== INQUIRY NEW ===== -->
+  <div id="page-inquiry-new" class="page">
+    <div class="header"><button class="header-back" onclick="showPage('inquiry')">←</button><span class="header-title">新規問い合わせ</span></div>
+    <div class="p-16">
+      <div id="inquiry-form">
+        <div class="mb-16"><label class="form-label">カテゴリ</label><select class="form-select"><option value="">選択してください</option><option>カード関連</option><option>レシート関連</option><option>残高・天引き</option><option>その他</option></select></div>
+        <div class="mb-16"><label class="form-label">件名</label><input class="form-input" placeholder="件名を入力"></div>
+        <div class="mb-16"><label class="form-label">詳細</label><textarea class="form-textarea" rows="5" placeholder="詳細を入力"></textarea></div>
+        <button class="btn-primary btn-full" onclick="submitInquiry()">送信する</button>
+      </div>
+      <div id="inquiry-done" style="display:none">
+        <div class="card text-center" style="padding:32px">
+          <div style="font-size:48px;margin-bottom:12px">✉️</div>
+          <div style="font-size:16px;font-weight:700;color:var(--green-600)">送信しました</div>
+          <div style="font-size:12px;color:var(--gray-500);margin-top:8px">人事担当からの回答をお待ちください。<br>回答はポータル内で確認できます。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MORE ===== -->
+  <div id="page-more" class="page">
+    <div class="header"><span class="header-title">その他</span></div>
+    <div class="p-16">
+      <button class="more-item" onclick="showPage('history')"><span style="font-size:24px">📋</span><div><div style="font-size:14px;font-weight:600">利用履歴</div><div style="font-size:11px;color:var(--gray-400)">全ての利用履歴を確認</div></div></button>
+      <button class="more-item" onclick="showPage('card')"><span style="font-size:24px">💳</span><div><div style="font-size:14px;font-weight:600">カード管理</div><div style="font-size:11px;color:var(--gray-400)">カード停止・再登録</div></div></button>
+      <button class="more-item" onclick="showPage('inquiry')"><span style="font-size:24px">✉️</span><div><div style="font-size:14px;font-weight:600">問い合わせ</div><div style="font-size:11px;color:var(--gray-400)">人事への問い合わせ</div></div></button>
+      <button class="more-item"><span style="font-size:24px">⚙️</span><div><div style="font-size:14px;font-weight:600">設定</div><div style="font-size:11px;color:var(--gray-400)">パスワード変更・ログアウト</div></div></button>
+    </div>
+  </div>
+
+  <!-- ===== CARD ===== -->
+  <div id="page-card" class="page">
+    <div class="header"><button class="header-back" onclick="showPage('more')">←</button><span class="header-title">カード管理</span></div>
+    <div class="p-16">
+      <div class="card mb-16">
+        <div style="font-size:12px;color:var(--gray-500);margin-bottom:4px">登録中のカード</div>
+        <div style="font-size:18px;font-weight:700;letter-spacing:1px">4980-XXXX-XXXX-1234</div>
+        <div style="font-size:11px;color:var(--green-600);margin-top:4px">● 有効</div>
+      </div>
+      <button class="btn-danger mb-8">カードを停止する</button>
+      <div style="font-size:11px;color:var(--gray-400);text-align:center;line-height:1.5">紛失時はすぐに停止してください。<br>停止後、新しいカードIDを登録できます。</div>
+    </div>
+  </div>
+
+  <!-- ===== BOTTOM NAV ===== -->
+  <div class="bottom-nav">
+    <button class="nav-btn active" id="nav-home" onclick="showPage('home')"><span class="nav-icon">⌂</span>ホーム</button>
+    <button class="nav-btn" id="nav-receipt" onclick="showPage('receipt')"><span class="nav-icon">📷</span>レシート</button>
+    <button class="nav-btn" id="nav-shops" onclick="showPage('shops')"><span class="nav-icon">🗺</span>お店</button>
+    <button class="nav-btn" id="nav-help" onclick="showPage('help')"><span class="nav-icon">💬</span>ヘルプ</button>
+    <button class="nav-btn" id="nav-more" onclick="showPage('more')"><span class="nav-icon">•••</span>その他</button>
+  </div>
+</div>
+
+<script>
+const navMap = { home:'nav-home', receipt:'nav-receipt', shops:'nav-shops', help:'nav-help', chatbot:'nav-help', more:'nav-more', history:'nav-more', card:'nav-more', inquiry:'nav-help', 'inquiry-new':'nav-help' };
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('page-' + id);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const navId = navMap[id];
+  if (navId) document.getElementById(navId).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function simulateUpload() {
+  document.getElementById('receipt-upload').style.display = 'none';
+  document.getElementById('receipt-result').style.display = 'block';
+}
+
+function searchMap(query) {
+  window.open('https://www.google.com/maps/search/' + encodeURIComponent(query) + '/', '_blank');
+}
+
+function toggleFaq(i) {
+  const a = document.getElementById('faq-a-' + i);
+  const arrow = document.getElementById('faq-arrow-' + i);
+  const isOpen = a.classList.contains('open');
+  document.querySelectorAll('.faq-a').forEach(el => el.classList.remove('open'));
+  document.querySelectorAll('.faq-arrow').forEach(el => el.classList.remove('open'));
+  if (!isOpen) { a.classList.add('open'); arrow.classList.add('open'); }
+}
+
+const faqData = [
+  { keywords: ['カード', '使い方'], answer: 'iD対応のお店で「iDで支払います」と伝えて、カードをかざすだけです。' },
+  { keywords: ['レシート', '撮'], answer: 'お会計後すぐに撮影してアップロードしてください。月末までに未提出だと全額天引きになります。' },
+  { keywords: ['天引き', '負担'], answer: '承認された昼食対象額の50%が従業員負担です。補助額を超えた分と否認品目は全額負担になります。' },
+  { keywords: ['有効期限', '残高'], answer: 'チャージから1年間有効です。有効期限が近づくとポータルに通知が表示されます。' },
+  { keywords: ['紛失', 'なくし'], answer: 'ポータルの「カード停止」からすぐに停止してください。その後、新しいカードIDを登録できます。' },
+];
+
+function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  const container = document.getElementById('chat-messages');
+  container.innerHTML += '<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><div class="chat-bubble user">' + escapeHtml(msg) + '</div></div>';
+  input.value = '';
+  container.scrollTop = container.scrollHeight;
+  setTimeout(() => {
+    const match = faqData.find(f => f.keywords.some(k => msg.includes(k)));
+    let reply = match ? match.answer : '申し訳ございません、お調べしてもわかりませんでした。';
+    let extra = match ? '' : '<br><button class="btn-primary" style="margin-top:8px;padding:6px 12px;font-size:11px" onclick="showPage(\'inquiry\')">人事に問い合わせる →</button>';
+    container.innerHTML += '<div style="display:flex;justify-content:flex-start;margin-bottom:10px"><div class="chat-bubble ai">' + reply + extra + '</div></div>';
+    container.scrollTop = container.scrollHeight;
+  }, 800);
+}
+
+function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+function submitInquiry() {
+  document.getElementById('inquiry-form').style.display = 'none';
+  document.getElementById('inquiry-done').style.display = 'block';
+}
+</script>
+</body>
+</html>
