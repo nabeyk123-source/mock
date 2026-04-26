@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ヒーローズ かんたん更新ツール</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --green-deep: #1a3a2a;
+  --green-mid: #2d5a3f;
+  --green-light: #e8f5ee;
+  --gold: #d4a843;
+  --gold-light: #f5e6c0;
+  --cream: #faf8f3;
+  --white: #ffffff;
+  --dark: #1a1a1a;
+  --gray-900: #374151;
+  --gray-600: #6b7280;
+  --gray-400: #9ca3af;
+  --gray-200: #e5e7eb;
+  --gray-100: #f3f4f6;
+  --red: #dc2626;
+  --red-light: #fef2f2;
+  --blue: #2563eb;
+  --blue-light: #eff6ff;
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,0.1), 0 12px 40px rgba(0,0,0,0.06);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--gray-100);
+  color: var(--dark);
+  min-height: 100vh;
+}
+
+/* ===== LAYOUT ===== */
+.app { display: flex; min-height: 100vh; }
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 240px;
+  background: var(--green-deep);
+  color: white;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s;
+}
+
+.sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-logo {
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--gold);
+}
+
+.sidebar-logo small {
+  display: block;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0;
+  margin-top: 2px;
+}
+
+.sidebar-nav { flex: 1; padding: 12px 0; overflow-y: auto; }
+
+.nav-section {
+  padding: 8px 20px 4px;
+  font-size: 10px;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-left: 3px solid transparent;
+}
+
+.nav-item:hover {
+  background: rgba(255,255,255,0.06);
+  color: white;
+}
+
+.nav-item.active {
+  background: rgba(255,255,255,0.1);
+  color: var(--gold);
+  border-left-color: var(--gold);
+}
+
+.nav-icon { font-size: 18px; width: 24px; text-align: center; }
+
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.site-selector {
+  width: 100%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: white;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: inherit;
+}
+
+.site-selector option { background: var(--green-deep); color: white; }
+
+/* ===== MAIN ===== */
+.main { flex: 1; margin-left: 240px; }
+
+.topbar {
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 0 32px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.topbar-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--dark);
+}
+
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-weight: 600;
+}
+
+.status-badge.connected { background: var(--green-light); color: var(--green-mid); }
+.status-badge.disconnected { background: var(--red-light); color: var(--red); }
+
+.status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.content { padding: 24px 32px; max-width: 960px; }
+
+/* ===== PANELS ===== */
+.panel {
+  display: none;
+  animation: fadeIn 0.25s ease;
+}
+
+.panel.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== CARDS ===== */
+.card {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 4px;
+}
+
+.card-desc {
+  font-size: 12px;
+  color: var(--gray-600);
+  margin-bottom: 20px;
+}
+
+/* ===== FORM ===== */
+.form-group { margin-bottom: 18px; }
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 6px;
+}
+
+.form-label .required {
+  color: var(--red);
+  font-size: 11px;
+  margin-left: 4px;
+}
+
+.form-hint {
+  font-size: 11px;
+  color: var(--gray-400);
+  margin-top: 4px;
+}
+
+input[type="text"],
+input[type="url"],
+input[type="password"],
+input[type="date"],
+select,
+textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--dark);
+  background: var(--white);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--green-mid);
+  box-shadow: 0 0 0 3px rgba(45,90,63,0.1);
+}
+
+textarea { resize: vertical; min-height: 120px; line-height: 1.7; }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+}
+
+.btn-primary {
+  background: var(--green-deep);
+  color: white;
+}
+.btn-primary:hover { background: var(--green-mid); transform: translateY(-1px); box-shadow: var(--shadow); }
+
+.btn-gold {
+  background: var(--gold);
+  color: var(--green-deep);
+}
+.btn-gold:hover { background: #c49a38; }
+
+.btn-outline {
+  background: transparent;
+  border: 1.5px solid var(--gray-200);
+  color: var(--gray-900);
+}
+.btn-outline:hover { border-color: var(--gray-400); background: var(--gray-100); }
+
+.btn-danger {
+  background: var(--red-light);
+  color: var(--red);
+  border: 1px solid #fecaca;
+}
+.btn-danger:hover { background: #fee2e2; }
+
+.btn-group { display: flex; gap: 10px; margin-top: 20px; }
+
+.btn-lg { padding: 14px 28px; font-size: 14px; }
+
+/* ===== TAG SELECTOR ===== */
+.tag-options { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.tag-option {
+  padding: 6px 16px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--white);
+  color: var(--gray-600);
+}
+
+.tag-option:hover { border-color: var(--gray-400); }
+.tag-option.selected { border-color: var(--green-mid); background: var(--green-light); color: var(--green-deep); }
+
+/* ===== FILE UPLOAD ===== */
+.upload-zone {
+  border: 2px dashed var(--gray-200);
+  border-radius: var(--radius);
+  padding: 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--gray-100);
+}
+
+.upload-zone:hover, .upload-zone.dragover {
+  border-color: var(--green-mid);
+  background: var(--green-light);
+}
+
+.upload-icon { font-size: 36px; margin-bottom: 8px; }
+.upload-text { font-size: 13px; color: var(--gray-600); font-weight: 500; }
+.upload-hint { font-size: 11px; color: var(--gray-400); margin-top: 4px; }
+
+.upload-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.preview-thumb {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--gray-200);
+}
+
+.preview-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.preview-remove {
+  position: absolute;
+  top: 4px; right: 4px;
+  width: 22px; height: 22px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== QUICK ACTIONS ===== */
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.quick-card {
+  background: var(--white);
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius);
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.quick-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.quick-icon { font-size: 32px; margin-bottom: 10px; }
+.quick-title { font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 4px; }
+.quick-desc { font-size: 11px; color: var(--gray-600); line-height: 1.5; }
+
+/* ===== PREVIEW ===== */
+.preview-box {
+  background: var(--cream);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-top: 16px;
+}
+
+.preview-box h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.preview-box .meta {
+  font-size: 12px;
+  color: var(--gray-600);
+  margin-bottom: 12px;
+}
+
+.preview-box .body {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--gray-900);
+}
+
+/* ===== TOAST ===== */
+.toast-container {
+  position: fixed;
+  top: 20px; right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast {
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  box-shadow: var(--shadow-lg);
+  animation: slideInRight 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toast.success { background: var(--green-mid); }
+.toast.error { background: var(--red); }
+.toast.info { background: var(--blue); }
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* ===== SETUP ===== */
+.setup-hero {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.setup-hero h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.setup-hero p {
+  font-size: 14px;
+  color: var(--gray-600);
+  margin-bottom: 24px;
+}
+
+.setup-steps {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  justify-content: center;
+}
+
+.setup-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--gray-400);
+  font-weight: 600;
+}
+
+.setup-step.active { color: var(--green-deep); }
+
+.setup-step .num {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--gray-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+
+.setup-step.active .num { background: var(--green-deep); color: white; }
+
+/* ===== HELP TIPS ===== */
+.help-tip {
+  background: var(--blue-light);
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--blue);
+  margin-bottom: 16px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  line-height: 1.6;
+}
+
+.help-tip-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+/* ===== TABLE ===== */
+.post-list { margin-top: 16px; }
+
+.post-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 120px 80px;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--gray-200);
+  font-size: 13px;
+}
+
+.post-row:last-child { border-bottom: none; }
+
+.post-title-cell { font-weight: 600; color: var(--dark); }
+.post-status {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 100px;
+  text-align: center;
+}
+.post-status.published { background: var(--green-light); color: var(--green-mid); }
+.post-status.draft { background: var(--gray-100); color: var(--gray-600); }
+
+.post-date { font-size: 12px; color: var(--gray-600); }
+.post-actions a { font-size: 12px; color: var(--blue); text-decoration: none; cursor: pointer; }
+.post-actions a:hover { text-decoration: underline; }
+
+/* ===== MOBILE ===== */
+.mobile-header {
+  display: none;
+  background: var(--green-deep);
+  padding: 12px 16px;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 60;
+}
+
+.mobile-header .sidebar-logo { font-size: 14px; }
+
+.hamburger {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+.hamburger span { display: block; width: 20px; height: 2px; background: white; margin: 4px 0; }
+
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 45;
+}
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .overlay.open { display: block; }
+  .mobile-header { display: flex; }
+  .main { margin-left: 0; }
+  .topbar { display: none; }
+  .content { padding: 16px; }
+  .form-row { grid-template-columns: 1fr; }
+  .quick-grid { grid-template-columns: 1fr 1fr; }
+  .post-row { grid-template-columns: 1fr 80px; }
+  .post-date, .post-actions { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- MOBILE HEADER -->
+  <div class="mobile-header">
+    <div class="sidebar-logo">HEROES UPDATER</div>
+    <button class="hamburger" onclick="toggleSidebar()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        HEROES UPDATER
+        <small>かんたん更新ツール</small>
+      </div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section">メイン</div>
+      <div class="nav-item active" onclick="showPanel('home')">
+        <span class="nav-icon">🏠</span> ホーム
+      </div>
+
+      <div class="nav-section">コンテンツ更新</div>
+      <div class="nav-item" onclick="showPanel('news')">
+        <span class="nav-icon">📰</span> ニュース投稿
+      </div>
+      <div class="nav-item" onclick="showPanel('tournament')">
+        <span class="nav-icon">🏉</span> 大会情報
+      </div>
+      <div class="nav-item" onclick="showPanel('photos')">
+        <span class="nav-icon">📷</span> 写真アップロード
+      </div>
+      <div class="nav-item" onclick="showPanel('pages')">
+        <span class="nav-icon">📄</span> ページ編集
+      </div>
+
+      <div class="nav-section">設定</div>
+      <div class="nav-item" onclick="showPanel('settings')">
+        <span class="nav-icon">⚙️</span> 接続設定
+      </div>
+      <div class="nav-item" onclick="showPanel('help')">
+        <span class="nav-icon">❓</span> 使い方ガイド
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <select class="site-selector" id="siteSelector">
+        <option value="heroes-cup">heroes-cup.com</option>
+        <option value="npo-heroes">npo-heroes.com</option>
+      </select>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">ホーム</div>
+      <div class="topbar-right">
+        <div class="status-badge disconnected" id="statusBadge">
+          <span class="status-dot"></span>
+          <span id="statusText">未接続</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ===== HOME ===== -->
+      <div class="panel active" id="panel-home">
+        <div style="margin-bottom:24px;">
+          <h2 style="font-size:20px;font-weight:700;margin-bottom:4px;">👋 ようこそ！</h2>
+          <p style="font-size:13px;color:var(--gray-600);">やりたいことを選んでください</p>
+        </div>
+
+        <div class="quick-grid">
+          <div class="quick-card" onclick="showPanel('news')">
+            <div class="quick-icon">📰</div>
+            <div class="quick-title">ニュースを投稿</div>
+            <div class="quick-desc">大会結果やお知らせを<br>サイトに掲載</div>
+          </div>
+          <div class="quick-card" onclick="showPanel('tournament')">
+            <div class="quick-icon">🏉</div>
+            <div class="quick-title">大会情報を更新</div>
+            <div class="quick-desc">日程・会場・結果を<br>かんたん更新</div>
+          </div>
+          <div class="quick-card" onclick="showPanel('photos')">
+            <div class="quick-icon">📷</div>
+            <div class="quick-title">写真をアップ</div>
+            <div class="quick-desc">大会やイベントの<br>写真をまとめて追加</div>
+          </div>
+          <div class="quick-card" onclick="showPanel('pages')">
+            <div class="quick-icon">📄</div>
+            <div class="quick-title">ページを編集</div>
+            <div class="quick-desc">NPO概要やスポンサー<br>ページの文章修正</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:24px;">
+          <div class="card-title">⚡ はじめての方へ</div>
+          <div class="card-desc">このツールを使うには、まずWordPressとの接続設定が必要です。</div>
+          <div style="background:var(--cream);border-radius:8px;padding:16px;font-size:13px;line-height:1.8;color:var(--gray-900);">
+            <strong>3ステップで完了：</strong><br>
+            ① WordPressの管理画面で「アプリケーションパスワード」を発行<br>
+            ② このツールの「⚙️ 接続設定」にURL・ユーザー名・パスワードを入力<br>
+            ③ 「接続テスト」ボタンで確認 → 完了！
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="showPanel('settings')">⚙️ 接続設定へ</button>
+            <button class="btn btn-outline" onclick="showPanel('help')">❓ 詳しい使い方</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== NEWS POST ===== -->
+      <div class="panel" id="panel-news">
+        <div class="card">
+          <div class="card-title">📰 ニュースを投稿する</div>
+          <div class="card-desc">タイトル・カテゴリ・本文を入力して「投稿する」を押すだけ！</div>
+
+          <div class="help-tip">
+            <span class="help-tip-icon">💡</span>
+            <span>まず「下書き保存」で確認してから「公開」するのがおすすめです。</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">タイトル <span class="required">必須</span></label>
+            <input type="text" id="newsTitle" placeholder="例：第19回ヒーローズカップ 北海道大会結果">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">カテゴリ</label>
+            <div class="tag-options">
+              <div class="tag-option selected" onclick="selectTag(this)">お知らせ</div>
+              <div class="tag-option" onclick="selectTag(this)">大会結果</div>
+              <div class="tag-option" onclick="selectTag(this)">イベント</div>
+              <div class="tag-option" onclick="selectTag(this)">ラグフェス</div>
+              <div class="tag-option" onclick="selectTag(this)">ラガール</div>
+              <div class="tag-option" onclick="selectTag(this)">メディア</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">本文 <span class="required">必須</span></label>
+            <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+              <button class="btn btn-outline" style="padding:4px 10px;font-size:11px;" onclick="insertTag('h2')">見出し</button>
+              <button class="btn btn-outline" style="padding:4px 10px;font-size:11px;" onclick="insertTag('bold')">太字</button>
+              <button class="btn btn-outline" style="padding:4px 10px;font-size:11px;" onclick="insertTag('link')">リンク</button>
+              <button class="btn btn-outline" style="padding:4px 10px;font-size:11px;" onclick="insertTag('list')">箇条書き</button>
+              <button class="btn btn-outline" style="padding:4px 10px;font-size:11px;" onclick="insertTag('br')">改行</button>
+            </div>
+            <textarea id="newsBody" placeholder="ここに本文を入力してください。&#10;&#10;改行はそのまま反映されます。&#10;写真は「写真アップロード」から先に追加してURLをコピーできます。"></textarea>
+            <div class="form-hint">HTMLが分からなくても大丈夫。上のボタンで書式を追加できます。</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">アイキャッチ画像</label>
+            <div class="upload-zone" id="newsImageZone" onclick="document.getElementById('newsImageInput').click()">
+              <div class="upload-icon">🖼️</div>
+              <div class="upload-text">クリックまたはドラッグで画像を選択</div>
+              <div class="upload-hint">JPG, PNG（推奨: 1200×630px）</div>
+            </div>
+            <input type="file" id="newsImageInput" accept="image/*" style="display:none" onchange="handleImagePreview(this, 'newsImagePreview')">
+            <div class="upload-preview" id="newsImagePreview"></div>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-primary btn-lg" onclick="submitPost('publish')">🚀 公開する</button>
+            <button class="btn btn-outline btn-lg" onclick="submitPost('draft')">💾 下書き保存</button>
+            <button class="btn btn-outline" onclick="togglePreview()">👁️ プレビュー</button>
+          </div>
+
+          <div class="preview-box" id="newsPreview" style="display:none;">
+            <div class="meta">プレビュー</div>
+            <h3 id="previewTitle">タイトル未入力</h3>
+            <div class="meta" id="previewMeta"></div>
+            <div class="body" id="previewBody">本文未入力</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📋 最近の投稿</div>
+          <div class="card-desc">サイトに掲載中の記事一覧（接続後に表示）</div>
+          <div class="post-list" id="postList">
+            <div style="text-align:center;padding:20px;color:var(--gray-400);font-size:13px;">
+              WordPress接続後に記事が表示されます
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== TOURNAMENT ===== -->
+      <div class="panel" id="panel-tournament">
+        <div class="card">
+          <div class="card-title">🏉 大会情報を更新する</div>
+          <div class="card-desc">地区大会・決勝大会の日程や結果を更新できます。</div>
+
+          <div class="form-group">
+            <label class="form-label">大会名 <span class="required">必須</span></label>
+            <select id="tournamentName">
+              <option>第19回 大樹生命ヒーローズカップ</option>
+              <option>第18回 大樹生命ヒーローズカップ</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">地区 <span class="required">必須</span></label>
+            <div class="tag-options" id="regionTags">
+              <div class="tag-option selected" onclick="selectTag(this)">北海道</div>
+              <div class="tag-option" onclick="selectTag(this)">東北</div>
+              <div class="tag-option" onclick="selectTag(this)">関東</div>
+              <div class="tag-option" onclick="selectTag(this)">東海北陸</div>
+              <div class="tag-option" onclick="selectTag(this)">近畿</div>
+              <div class="tag-option" onclick="selectTag(this)">中国四国</div>
+              <div class="tag-option" onclick="selectTag(this)">九州</div>
+              <div class="tag-option" onclick="selectTag(this)">決勝大会</div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">開催日</label>
+              <input type="date" id="tournamentDate">
+            </div>
+            <div class="form-group">
+              <label class="form-label">会場</label>
+              <input type="text" id="tournamentVenue" placeholder="例：日産スタジアム">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">ステータス</label>
+            <div class="tag-options">
+              <div class="tag-option selected" onclick="selectTag(this)">日程確定</div>
+              <div class="tag-option" onclick="selectTag(this)">エントリー受付中</div>
+              <div class="tag-option" onclick="selectTag(this)">開催済み</div>
+              <div class="tag-option" onclick="selectTag(this)">結果掲載済み</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">結果・詳細メモ</label>
+            <textarea id="tournamentResult" rows="4" placeholder="優勝チーム、スコア、特記事項など"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">結果PDF / トーナメント表</label>
+            <div class="upload-zone" onclick="document.getElementById('tournamentFileInput').click()">
+              <div class="upload-icon">📎</div>
+              <div class="upload-text">PDF・画像ファイルをアップロード</div>
+              <div class="upload-hint">PDF, JPG, PNG（最大10MB）</div>
+            </div>
+            <input type="file" id="tournamentFileInput" accept=".pdf,image/*" style="display:none">
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-primary btn-lg" onclick="showToast('大会情報を更新しました', 'success')">🏉 更新する</button>
+            <button class="btn btn-outline btn-lg" onclick="showToast('下書き保存しました', 'info')">💾 下書き保存</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PHOTOS ===== -->
+      <div class="panel" id="panel-photos">
+        <div class="card">
+          <div class="card-title">📷 写真をアップロードする</div>
+          <div class="card-desc">大会やイベントの写真をまとめてアップロードできます。</div>
+
+          <div class="help-tip">
+            <span class="help-tip-icon">💡</span>
+            <span>アップロード後、各写真のURLが表示されます。ニュース投稿に貼り付けて使えます。</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">アルバム名</label>
+            <input type="text" placeholder="例：第19回北海道大会 試合写真">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">写真を選択 <span class="required">必須</span></label>
+            <div class="upload-zone" id="photosZone" onclick="document.getElementById('photosInput').click()">
+              <div class="upload-icon">📷</div>
+              <div class="upload-text">クリックまたはドラッグで写真を選択</div>
+              <div class="upload-hint">複数選択OK・JPG, PNG（1枚あたり最大5MB）</div>
+            </div>
+            <input type="file" id="photosInput" accept="image/*" multiple style="display:none" onchange="handleMultiImagePreview(this)">
+            <div class="upload-preview" id="photosPreview"></div>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-gold btn-lg" onclick="showToast('写真をアップロード中...（デモ）', 'info')">📤 まとめてアップロード</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PAGES ===== -->
+      <div class="panel" id="panel-pages">
+        <div class="card">
+          <div class="card-title">📄 ページを編集する</div>
+          <div class="card-desc">既存のページの文章を修正できます。接続後にページ一覧が表示されます。</div>
+
+          <div class="form-group">
+            <label class="form-label">編集するページ</label>
+            <select id="pageSelect">
+              <option value="">ページを選択...</option>
+              <option>トップページ</option>
+              <option>NPO概要</option>
+              <option>スポンサー</option>
+              <option>お問い合わせ</option>
+              <option>ラグビー寺子屋</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">ページ本文</label>
+            <textarea id="pageBody" rows="12" placeholder="ページを選択すると、現在の内容が表示されます。編集して「更新する」を押してください。"></textarea>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-primary btn-lg" onclick="showToast('ページを更新しました', 'success')">✅ 更新する</button>
+            <button class="btn btn-outline" onclick="window.open('https://www.npo-heroes.com/about-us/', '_blank')">🔗 現在のページを確認</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SETTINGS ===== -->
+      <div class="panel" id="panel-settings">
+        <div class="card">
+          <div class="card-title">⚙️ WordPress接続設定</div>
+          <div class="card-desc">サイトのURLと認証情報を設定します。</div>
+
+          <div class="help-tip">
+            <span class="help-tip-icon">🔒</span>
+            <span>認証情報はこのブラウザにのみ保存されます。サーバーには送信されません。</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">サイトURL <span class="required">必須</span></label>
+            <input type="url" id="wpUrl" placeholder="https://heroes-cup.com">
+            <div class="form-hint">WordPress がインストールされているURLを入力</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">ユーザー名 <span class="required">必須</span></label>
+            <input type="text" id="wpUser" placeholder="WordPress のログインユーザー名">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">アプリケーションパスワード <span class="required">必須</span></label>
+            <input type="password" id="wpAppPass" placeholder="xxxx xxxx xxxx xxxx xxxx xxxx">
+            <div class="form-hint">WordPress管理画面 → ユーザー → プロフィール → アプリケーションパスワード で発行</div>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-primary btn-lg" onclick="testConnection()">🔌 接続テスト</button>
+            <button class="btn btn-gold btn-lg" onclick="saveSettings()">💾 設定を保存</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📖 アプリケーションパスワードの作り方</div>
+          <div style="font-size:13px;line-height:2;color:var(--gray-900);">
+            <strong>① </strong>WordPressにログイン<br>
+            <strong>② </strong>左メニュー「ユーザー」→「プロフィール」<br>
+            <strong>③ </strong>ページ下部の「アプリケーションパスワード」セクション<br>
+            <strong>④ </strong>名前に「更新ツール」と入力して「新しいアプリケーションパスワードを追加」<br>
+            <strong>⑤ </strong>表示されたパスワードをコピーして↑に貼り付け<br>
+            <br>
+            <span style="color:var(--red);font-weight:600;">⚠️ パスワードは発行時に1回だけ表示されます。必ずコピーしてください。</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== HELP ===== -->
+      <div class="panel" id="panel-help">
+        <div class="card">
+          <div class="card-title">❓ 使い方ガイド</div>
+          <div style="font-size:14px;line-height:2.0;color:var(--gray-900);">
+
+            <h3 style="font-size:16px;font-weight:700;margin:20px 0 8px;color:var(--green-deep);">🔌 初期設定</h3>
+            「⚙️ 接続設定」でWordPressサイトのURL・ユーザー名・アプリケーションパスワードを入力して接続します。<br>
+            一度設定すればブラウザに保存されるので、次回以降は自動で接続されます。
+
+            <h3 style="font-size:16px;font-weight:700;margin:20px 0 8px;color:var(--green-deep);">📰 ニュース投稿</h3>
+            タイトル・カテゴリ・本文を入力するだけ。写真もドラッグ＆ドロップで追加できます。<br>
+            「下書き保存」で一旦保存→サイトで確認→問題なければ「公開」の流れがおすすめ。
+
+            <h3 style="font-size:16px;font-weight:700;margin:20px 0 8px;color:var(--green-deep);">🏉 大会情報</h3>
+            地区を選んで日程・会場を入力。結果が出たらPDFやスコアを追加して更新します。
+
+            <h3 style="font-size:16px;font-weight:700;margin:20px 0 8px;color:var(--green-deep);">📷 写真アップロード</h3>
+            複数枚をまとめて選択してアップロード。アップロード後に表示されるURLを<br>
+            ニュース記事に貼り付けて使えます。
+
+            <h3 style="font-size:16px;font-weight:700;margin:20px 0 8px;color:var(--green-deep);">📄 ページ編集</h3>
+            NPO概要やスポンサーページなど、固定ページの文章を直接編集できます。
+
+            <h3 style="font-size:16px;font-weight:700;margin:20px 0 8px;color:var(--green-deep);">⚠️ 困ったら</h3>
+            <ul style="padding-left:20px;">
+              <li>「接続エラー」→ URL・パスワードを再確認</li>
+              <li>「写真がアップできない」→ ファイルサイズ5MB以下に</li>
+              <li>「記事が表示されない」→ 「下書き」のままかも。「公開」に変更</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ===== NAVIGATION =====
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const panel = document.getElementById('panel-' + name);
+  if (panel) panel.classList.add('active');
+
+  const titles = {
+    home: 'ホーム', news: 'ニュース投稿', tournament: '大会情報',
+    photos: '写真アップロード', pages: 'ページ編集',
+    settings: '接続設定', help: '使い方ガイド'
+  };
+  document.getElementById('topbarTitle').textContent = titles[name] || '';
+
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach(item => {
+    if (item.textContent.trim().includes(titles[name]?.replace(/📰|🏉|📷|📄|⚙️|❓|🏠/g, '').trim())) {
+      item.classList.add('active');
+    }
+  });
+
+  // Close mobile sidebar
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+
+// ===== TAG SELECT =====
+function selectTag(el) {
+  const group = el.parentElement;
+  group.querySelectorAll('.tag-option').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// ===== TOAST =====
+function showToast(message, type = 'info') {
+  const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  toast.innerHTML = `<span>${icons[type]}</span> ${message}`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+}
+
+// ===== TEXT FORMATTING =====
+function insertTag(type) {
+  const ta = document.getElementById('newsBody');
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  const selected = ta.value.substring(start, end);
+  let insert = '';
+
+  switch(type) {
+    case 'h2': insert = `\n<h2>${selected || '見出しテキスト'}</h2>\n`; break;
+    case 'bold': insert = `<strong>${selected || '太字テキスト'}</strong>`; break;
+    case 'link': insert = `<a href="URL">${selected || 'リンクテキスト'}</a>`; break;
+    case 'list': insert = `\n<ul>\n<li>${selected || '項目1'}</li>\n<li>項目2</li>\n</ul>\n`; break;
+    case 'br': insert = `<br>\n`; break;
+  }
+
+  ta.value = ta.value.substring(0, start) + insert + ta.value.substring(end);
+  ta.focus();
+}
+
+// ===== IMAGE PREVIEW =====
+function handleImagePreview(input, previewId) {
+  const preview = document.getElementById(previewId);
+  preview.innerHTML = '';
+  if (input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      preview.innerHTML = `
+        <div class="preview-thumb">
+          <img src="${e.target.result}">
+          <button class="preview-remove" onclick="this.parentElement.remove()">×</button>
+        </div>`;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function handleMultiImagePreview(input) {
+  const preview = document.getElementById('photosPreview');
+  preview.innerHTML = '';
+  Array.from(input.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const thumb = document.createElement('div');
+      thumb.className = 'preview-thumb';
+      thumb.innerHTML = `
+        <img src="${e.target.result}">
+        <button class="preview-remove" onclick="this.parentElement.remove()">×</button>`;
+      preview.appendChild(thumb);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ===== PREVIEW =====
+function togglePreview() {
+  const box = document.getElementById('newsPreview');
+  const visible = box.style.display !== 'none';
+  box.style.display = visible ? 'none' : 'block';
+  if (!visible) {
+    document.getElementById('previewTitle').textContent = document.getElementById('newsTitle').value || 'タイトル未入力';
+    document.getElementById('previewMeta').textContent = new Date().toLocaleDateString('ja-JP');
+    document.getElementById('previewBody').innerHTML = document.getElementById('newsBody').value.replace(/\n/g, '<br>') || '本文未入力';
+  }
+}
+
+// ===== WP CONNECTION =====
+function saveSettings() {
+  const url = document.getElementById('wpUrl').value;
+  const user = document.getElementById('wpUser').value;
+  const pass = document.getElementById('wpAppPass').value;
+
+  if (!url || !user || !pass) {
+    showToast('すべての項目を入力してください', 'error');
+    return;
+  }
+
+  localStorage.setItem('wp_url', url);
+  localStorage.setItem('wp_user', user);
+  localStorage.setItem('wp_pass', pass);
+  showToast('設定を保存しました', 'success');
+}
+
+function testConnection() {
+  const url = document.getElementById('wpUrl').value;
+  const user = document.getElementById('wpUser').value;
+  const pass = document.getElementById('wpAppPass').value;
+
+  if (!url || !user || !pass) {
+    showToast('すべての項目を入力してください', 'error');
+    return;
+  }
+
+  showToast('接続テスト中...', 'info');
+
+  const apiUrl = url.replace(/\/$/, '') + '/wp-json/wp/v2/posts?per_page=1';
+  const headers = new Headers();
+  headers.set('Authorization', 'Basic ' + btoa(user + ':' + pass));
+
+  fetch(apiUrl, { headers })
+    .then(res => {
+      if (res.ok) {
+        showToast('接続成功！ WordPress と繋がりました', 'success');
+        document.getElementById('statusBadge').className = 'status-badge connected';
+        document.getElementById('statusText').textContent = '接続中';
+        return res.json();
+      } else {
+        throw new Error('認証エラー (HTTP ' + res.status + ')');
+      }
+    })
+    .then(posts => {
+      if (posts && posts.length) {
+        showToast('記事を取得できました（最新: ' + posts[0].title.rendered.substring(0, 20) + '...）', 'success');
+      }
+    })
+    .catch(err => {
+      showToast('接続失敗: ' + err.message, 'error');
+    });
+}
+
+function submitPost(status) {
+  const title = document.getElementById('newsTitle').value;
+  const body = document.getElementById('newsBody').value;
+
+  if (!title) { showToast('タイトルを入力してください', 'error'); return; }
+  if (!body) { showToast('本文を入力してください', 'error'); return; }
+
+  const url = localStorage.getItem('wp_url');
+  const user = localStorage.getItem('wp_user');
+  const pass = localStorage.getItem('wp_pass');
+
+  if (!url || !user || !pass) {
+    showToast('先に接続設定を完了してください', 'error');
+    return;
+  }
+
+  const apiUrl = url.replace(/\/$/, '') + '/wp-json/wp/v2/posts';
+  const headers = new Headers();
+  headers.set('Authorization', 'Basic ' + btoa(user + ':' + pass));
+  headers.set('Content-Type', 'application/json');
+
+  const postData = {
+    title: title,
+    content: body,
+    status: status
+  };
+
+  showToast(status === 'publish' ? '投稿中...' : '保存中...', 'info');
+
+  fetch(apiUrl, { method: 'POST', headers, body: JSON.stringify(postData) })
+    .then(res => {
+      if (res.ok) return res.json();
+      throw new Error('投稿エラー (HTTP ' + res.status + ')');
+    })
+    .then(post => {
+      showToast(
+        status === 'publish'
+          ? '🎉 公開しました！'
+          : '💾 下書き保存しました',
+        'success'
+      );
+      document.getElementById('newsTitle').value = '';
+      document.getElementById('newsBody').value = '';
+    })
+    .catch(err => {
+      showToast('エラー: ' + err.message, 'error');
+    });
+}
+
+// ===== INIT =====
+window.addEventListener('load', () => {
+  const url = localStorage.getItem('wp_url');
+  const user = localStorage.getItem('wp_user');
+  const pass = localStorage.getItem('wp_pass');
+
+  if (url) document.getElementById('wpUrl').value = url;
+  if (user) document.getElementById('wpUser').value = user;
+  if (pass) document.getElementById('wpAppPass').value = pass;
+
+  if (url && user && pass) {
+    document.getElementById('statusBadge').className = 'status-badge connected';
+    document.getElementById('statusText').textContent = '設定済み';
+  }
+});
+
+// Drag & drop
+['newsImageZone', 'photosZone'].forEach(id => {
+  const zone = document.getElementById(id);
+  if (!zone) return;
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+  });
+});
+</script>
+
+</body>
+</html>
