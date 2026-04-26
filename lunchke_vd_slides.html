@@ -498,6 +498,122 @@ body {
   background: var(--accent);
   color: var(--white);
 }
+
+/* ===== Mobile Responsive ===== */
+@media (max-width: 768px) {
+  .slide-inner {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Title slide */
+  .s1 .slide-inner {
+    padding: 60px 28px 40px;
+    justify-content: flex-start;
+    padding-top: 80px;
+  }
+  .s1 h1 { font-size: 32px; }
+  .s1 .subtitle { font-size: 16px; }
+  .s1 .label { font-size: 11px; }
+  .s1 .meta { font-size: 13px; }
+
+  /* Content slides */
+  .content-slide .slide-inner {
+    padding: 56px 20px 60px;
+  }
+  .slide-title { font-size: 22px; margin-bottom: 6px; }
+  .slide-sub { font-size: 12px; margin-bottom: 16px; }
+
+  /* Urgency */
+  .alert-bar { padding: 10px 14px; margin-bottom: 16px; }
+  .alert-bar span { font-size: 12px; }
+  .compare-row { flex-direction: column; gap: 12px; }
+  .compare-card { padding: 20px; }
+  .compare-card .big-num { font-size: 32px; }
+  .compare-card .detail { font-size: 12px; }
+  .bottom-note { font-size: 13px; margin-top: 16px; }
+
+  /* Info grid */
+  .info-grid { grid-template-columns: 100px 1fr; margin-top: 12px; }
+  .info-grid .label-cell { padding: 10px 10px; font-size: 11px; }
+  .info-grid .value-cell { padding: 10px 12px; font-size: 11px; }
+
+  /* Phase */
+  .phase-row { flex-direction: column; gap: 8px; margin-top: 10px; }
+  .phase-card { padding: 18px; }
+  .phase-card h3 { font-size: 15px; }
+  .phase-card .who { font-size: 11px; margin-bottom: 10px; }
+  .phase-card li { font-size: 11px; padding: 3px 0; }
+  .phase-card .badge { font-size: 10px; margin-top: 10px; }
+  .phase-arrow {
+    flex-direction: row;
+    width: auto;
+    height: auto;
+    gap: 8px;
+    padding: 4px 0;
+  }
+  .phase-arrow .arrow-icon { font-size: 20px; transform: rotate(90deg); }
+  .phase-arrow .arrow-label { font-size: 9px; }
+
+  /* Timeline */
+  .tl-group { margin-bottom: 20px; }
+  .tl-bar-container { height: 36px; }
+  .tl-bar { height: 28px; font-size: 9px !important; padding: 0 6px; top: 4px; }
+  .tl-months span { font-size: 9px; }
+  .tl-legend { gap: 8px; }
+  .tl-legend-item { font-size: 10px; }
+  .savings-callout { flex-direction: column; gap: 8px; padding: 14px 18px; margin-top: 14px; }
+  .savings-num { font-size: 28px; }
+  .savings-text { font-size: 12px; }
+
+  /* Roles */
+  .role-table th { font-size: 10px; padding: 8px 8px; }
+  .role-table td { font-size: 10px; padding: 7px 8px; }
+  .role-label { font-size: 11px; }
+  .note-box { font-size: 11px; padding: 10px 14px; margin-top: 10px; }
+
+  /* Ask */
+  .s7 .slide-inner {
+    padding: 56px 20px 60px;
+  }
+  .s7 .slide-title { font-size: 22px; margin-bottom: 16px; }
+  .ask-item { padding: 12px 16px; margin-bottom: 8px; gap: 12px; }
+  .ask-num { font-size: 20px; width: 28px; }
+  .ask-text { font-size: 14px; }
+
+  /* Nav bar */
+  .slide-nav {
+    padding: 6px 8px;
+    gap: 2px;
+    overflow-x: auto;
+    justify-content: flex-start;
+    -webkit-overflow-scrolling: touch;
+  }
+  .slide-nav a {
+    padding: 6px 10px;
+    font-size: 10px;
+    flex-shrink: 0;
+  }
+
+  /* Page number */
+  .page-num { bottom: 8px; right: 12px; font-size: 10px; }
+
+  .nav-hint { bottom: 48px; font-size: 11px; }
+}
+
+@media (max-width: 400px) {
+  .s1 h1 { font-size: 26px; }
+  .s1 .subtitle { font-size: 14px; }
+  .slide-title { font-size: 19px; }
+  .compare-card .big-num { font-size: 26px; }
+  .info-grid { grid-template-columns: 80px 1fr; }
+  .info-grid .label-cell { font-size: 10px; padding: 8px 6px; }
+  .info-grid .value-cell { font-size: 10px; padding: 8px 8px; }
+}
 </style>
 </head>
 <body>
