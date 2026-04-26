@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ランチケ プロジェクト - AI活用型 開発フローの提案</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0F2B46;
+  --navy2: #183D5E;
+  --navy3: #1E4D73;
+  --accent: #E8913A;
+  --accent-light: #FFF3E6;
+  --green: #1B9A5A;
+  --green-light: #E8F7EE;
+  --red: #D63031;
+  --red-light: #FDE8E8;
+  --light: #F5F7FA;
+  --white: #FFFFFF;
+  --dark: #1A2A3A;
+  --mid: #6B7B8D;
+  --border: #E2E8F0;
+  --total-slides: 7;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Noto Sans JP', 'DM Sans', sans-serif;
+  background: #0e0e1a;
+  color: var(--dark);
+}
+
+.slide {
+  width: 100vw;
+  height: 100vh;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.slide-inner {
+  width: min(960px, 94vw);
+  height: min(540px, 80vh);
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+
+/* Page number */
+.page-num {
+  position: absolute;
+  bottom: 12px;
+  right: 20px;
+  font-size: 11px;
+  font-family: 'DM Sans', sans-serif;
+  color: rgba(255,255,255,0.3);
+  z-index: 10;
+  pointer-events: none;
+}
+.page-num.dark { color: rgba(0,0,0,0.25); }
+
+/* Navigation hint */
+.nav-hint {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: rgba(255,255,255,0.3);
+  z-index: 100;
+  animation: fadeHint 4s ease forwards;
+  pointer-events: none;
+}
+@keyframes fadeHint {
+  0%,60% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.scroll-arrow {
+  display: inline-block;
+  animation: bounce 1.5s infinite;
+  margin-left: 4px;
+}
+@keyframes bounce {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+
+/* ===== SLIDE 1: Title ===== */
+.s1 .slide-inner {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 60%, var(--navy3) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 80px;
+}
+.s1 .slide-inner::before {
+  content: '';
+  position: absolute;
+  right: -100px;
+  top: -100px;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(232,145,58,0.08) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.s1 .label {
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.s1 h1 {
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--white);
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+.s1 .subtitle {
+  font-size: 20px;
+  color: rgba(255,255,255,0.7);
+  font-weight: 400;
+  margin-bottom: 32px;
+}
+.s1 .divider {
+  width: 80px;
+  height: 3px;
+  background: var(--accent);
+  margin-bottom: 32px;
+}
+.s1 .meta {
+  font-size: 14px;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.8;
+}
+
+/* ===== Common ===== */
+.content-slide .slide-inner {
+  background: var(--white);
+  padding: 48px 60px;
+}
+.slide-title {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--dark);
+  margin-bottom: 8px;
+}
+.slide-sub {
+  font-size: 14px;
+  color: var(--mid);
+  margin-bottom: 24px;
+}
+
+/* ===== SLIDE 2: Urgency ===== */
+.alert-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--red-light);
+  padding: 12px 20px;
+  border-radius: 8px;
+  border-left: 4px solid var(--red);
+  margin-bottom: 28px;
+}
+.alert-bar .icon { font-size: 18px; }
+.alert-bar span { font-size: 14px; color: #922; font-weight: 500; }
+.compare-row {
+  display: flex;
+  gap: 24px;
+}
+.compare-card {
+  flex: 1;
+  border-radius: 12px;
+  padding: 28px;
+}
+.compare-card.old { background: var(--light); border: 1px solid var(--border); }
+.compare-card.new { background: var(--green-light); border: 1px solid rgba(27,154,90,0.2); }
+.compare-card .card-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--mid);
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+.compare-card .big-num {
+  font-size: 44px;
+  font-weight: 900;
+  font-family: 'DM Sans', sans-serif;
+  line-height: 1.1;
+}
+.compare-card.old .big-num { color: var(--red); }
+.compare-card.new .big-num { color: var(--green); }
+.compare-card .detail {
+  font-size: 13px;
+  color: var(--mid);
+  margin-top: 8px;
+}
+.bottom-note {
+  margin-top: 24px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--red);
+}
+
+/* ===== SLIDE 3: Info ===== */
+.info-grid {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 20px;
+}
+.info-grid .label-cell {
+  background: var(--navy);
+  color: var(--white);
+  padding: 14px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.info-grid .value-cell {
+  padding: 14px 20px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+}
+.info-grid .value-cell.highlight {
+  color: var(--green);
+  font-weight: 700;
+}
+
+/* ===== SLIDE 4: Phase ===== */
+.phase-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+}
+.phase-card {
+  flex: 1;
+  border-radius: 12px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.phase-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+}
+.phase-card.p1 { background: var(--accent-light); }
+.phase-card.p1::before { background: var(--accent); }
+.phase-card.p2 { background: var(--light); }
+.phase-card.p2::before { background: var(--navy); }
+.phase-card h3 { font-size: 17px; font-weight: 800; margin-bottom: 4px; }
+.phase-card.p1 h3 { color: var(--accent); }
+.phase-card.p2 h3 { color: var(--navy); }
+.phase-card .who { font-size: 12px; color: var(--mid); margin-bottom: 14px; }
+.phase-card ul { list-style: none; padding: 0; }
+.phase-card li {
+  font-size: 12px;
+  color: var(--dark);
+  padding: 4px 0;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.phase-card li::before { content: '●'; font-size: 8px; flex-shrink: 0; }
+.phase-card.p1 li::before { color: var(--accent); }
+.phase-card.p2 li::before { color: var(--navy); }
+.phase-card .badge {
+  margin-top: 14px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+.phase-card.p1 .badge { background: var(--white); color: var(--accent); }
+.phase-card.p2 .badge { background: var(--white); color: var(--navy); }
+.phase-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 56px;
+  flex-shrink: 0;
+}
+.phase-arrow .arrow-icon { font-size: 28px; color: var(--navy); font-weight: 700; }
+.phase-arrow .arrow-label { font-size: 9px; color: var(--mid); text-align: center; line-height: 1.3; }
+
+/* ===== SLIDE 5: Timeline ===== */
+.tl-group { margin-bottom: 32px; }
+.tl-label-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.tl-label-tag {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.tl-label-tag.old { background: var(--red-light); color: var(--red); }
+.tl-label-tag.new { background: var(--green-light); color: var(--green); }
+.tl-duration { font-size: 12px; color: var(--mid); }
+.tl-bar-container { position: relative; height: 44px; }
+.tl-bar {
+  position: absolute;
+  height: 36px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--white);
+  top: 4px;
+}
+.tl-bar.old1 { background: #E57373; left: 0; width: 22%; }
+.tl-bar.old2 { background: #EF5350; left: 22%; width: 38%; }
+.tl-bar.old3 { background: #F44336; left: 60%; width: 20%; }
+.tl-bar.old4 { background: #D32F2F; left: 80%; width: 20%; }
+.tl-bar.new1 { background: var(--accent); left: 0; width: 6%; }
+.tl-bar.new2 { background: #F0A050; left: 6%; width: 12%; }
+.tl-bar.new3 { background: var(--navy2); left: 18%; width: 20%; }
+.tl-bar.new4 { background: var(--green); left: 38%; width: 10%; }
+.tl-months {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--mid);
+  margin-top: 8px;
+  padding: 0 2px;
+}
+.tl-legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.tl-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--dark);
+}
+.tl-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.savings-callout {
+  margin-top: 20px;
+  background: var(--green-light);
+  border-radius: 10px;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.savings-num {
+  font-size: 36px;
+  font-weight: 900;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--green);
+}
+.savings-text { font-size: 13px; color: var(--dark); line-height: 1.6; }
+
+/* ===== SLIDE 6: Roles ===== */
+.role-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.role-table th {
+  background: var(--navy);
+  color: var(--white);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 10px 16px;
+  text-align: left;
+}
+.role-table td {
+  padding: 9px 16px;
+  font-size: 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.role-table tr:last-child td { border-bottom: none; }
+.role-label { font-weight: 700; font-size: 13px; }
+.note-box {
+  margin-top: 14px;
+  background: var(--light);
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--navy);
+  font-weight: 600;
+  line-height: 1.7;
+}
+
+/* ===== SLIDE 7: Ask ===== */
+.s7 .slide-inner {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
+  padding: 48px 60px;
+  display: flex;
+  flex-direction: column;
+}
+.s7 .slide-title { color: var(--white); margin-bottom: 28px; }
+.ask-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 16px 24px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.ask-num {
+  font-size: 24px;
+  font-weight: 900;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--accent);
+  width: 36px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.ask-text { font-size: 16px; color: var(--white); font-weight: 500; }
+.ask-footer {
+  margin-top: auto;
+  display: flex;
+  gap: 24px;
+  padding-top: 16px;
+}
+.ask-tag { font-size: 15px; font-weight: 700; color: var(--accent); }
+.ask-sep { color: rgba(255,255,255,0.2); font-size: 15px; }
+
+/* ===== Navigation Bar ===== */
+.slide-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  display: flex;
+  justify-content: center;
+  padding: 8px 16px;
+  background: rgba(10,10,26,0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  gap: 4px;
+}
+.slide-nav a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.45);
+  text-decoration: none;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.slide-nav a:hover {
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.9);
+}
+.slide-nav a.active {
+  background: var(--accent);
+  color: var(--white);
+}
+</style>
+</head>
+<body>
+
+<div class="nav-hint">スクロールでページ送り <span class="scroll-arrow">↓</span></div>
+
+<nav class="slide-nav" id="slideNav">
+  <a href="#s1" data-slide="1">1. 表紙</a>
+  <a href="#s2" data-slide="2">2. 緊急性</a>
+  <a href="#s3" data-slide="3">3. 概要</a>
+  <a href="#s4" data-slide="4">4. フェーズ</a>
+  <a href="#s5" data-slide="5">5. タイムライン</a>
+  <a href="#s6" data-slide="6">6. 役割分担</a>
+  <a href="#s7" data-slide="7">7. ご判断事項</a>
+</nav>
+
+<!-- SLIDE 1: Title -->
+<div class="slide s1" id="s1">
+  <div class="slide-inner">
+    <div class="label">PROPOSAL</div>
+    <h1>ランチケ プロジェクト</h1>
+    <div class="subtitle">AI活用型 開発フローの提案</div>
+    <div class="divider"></div>
+    <div class="meta">
+      株式会社バリューデザイン　営業企画部<br>
+      2026年4月
+    </div>
+    <div class="page-num">1 / 7</div>
+  </div>
+</div>
+
+<!-- SLIDE 2: Urgency -->
+<div class="slide content-slide" id="s2">
+  <div class="slide-inner">
+    <div class="slide-title">市場環境と緊急性</div>
+    <div class="alert-bar">
+      <span class="icon">⚠️</span>
+      <span>エデンレッドジャパン「チケットレストラン」がTV-CM展開中。積極的な市場獲得に動いている。</span>
+    </div>
+    <div class="compare-row">
+      <div class="compare-card old">
+        <div class="card-label">通常プロセス</div>
+        <div class="big-num">6〜9ヶ月</div>
+        <div class="detail">リリースは年末以降<br>その頃には競合が市場を確立済み</div>
+      </div>
+      <div class="compare-card new">
+        <div class="card-label">PoC先行型開発</div>
+        <div class="big-num">即時販売可能</div>
+        <div class="detail">プロトタイプで先行販売を開始<br>市場検証しながら正式版を並行開発</div>
+      </div>
+    </div>
+    <div class="bottom-note">→ 今動かなければ、競合に市場を取られる</div>
+    <div class="page-num dark">2 / 7</div>
+  </div>
+</div>
+
+<!-- SLIDE 3: What is Lunch-Ke -->
+<div class="slide content-slide" id="s3">
+  <div class="slide-inner">
+    <div class="slide-title">ランチケとは</div>
+    <div class="info-grid">
+      <div class="label-cell">サービス名</div>
+      <div class="value-cell">ランチケ</div>
+      <div class="label-cell">カテゴリ</div>
+      <div class="value-cell">食事補助型 福利厚生サービス</div>
+      <div class="label-cell">決済手段</div>
+      <div class="value-cell">ドコモ iD ／ VD独自Pay</div>
+      <div class="label-cell">VDシナジー</div>
+      <div class="value-cell">既存キャッシュレス基盤・加盟店NW・決済インフラを活用</div>
+      <div class="label-cell">競合</div>
+      <div class="value-cell">エデンレッドジャパン「チケットレストラン」（TV-CM展開中）</div>
+      <div class="label-cell">開発状況</div>
+      <div class="value-cell highlight">✅ 管理画面・アプリ・API連携 すべて完成済み（販売可能な品質）</div>
+    </div>
+    <div class="page-num dark">3 / 7</div>
+  </div>
+</div>
+
+<!-- SLIDE 4: Phase -->
+<div class="slide content-slide" id="s4">
+  <div class="slide-inner">
+    <div class="slide-title">開発フェーズ：PoC先行販売 → 正式版移行</div>
+    <div class="slide-sub">PdMが市場検証まで担い、開発部が正式版を構築して移行する</div>
+    <div class="phase-row">
+      <div class="phase-card p1">
+        <h3>Phase 1：PoC先行販売</h3>
+        <div class="who">担当：PdM（営業企画部）　サブ：PM（プロダクト推進部）</div>
+        <ul>
+          <li>プロトタイプで先行販売を開始</li>
+          <li>初期顧客の獲得・フィードバック収集</li>
+          <li>市場ニーズの検証・仕様の確定</li>
+          <li>運用設計・顧客対応フローを先行確立</li>
+          <li>販売実績・データの蓄積</li>
+        </ul>
+        <div class="badge">品質：販売可能レベル（PoC）</div>
+      </div>
+      <div class="phase-arrow">
+        <div class="arrow-icon">→</div>
+        <div class="arrow-label">実績・運用<br>ノウハウを<br>引き継ぎ</div>
+      </div>
+      <div class="phase-card p2">
+        <h3>Phase 2：正式版リリース</h3>
+        <div class="who">担当：開発部（正式な製品として構築）</div>
+        <ul>
+          <li>仕様確定済み → 手戻りなく開発着手</li>
+          <li>運用フロー確立済み → リリース後の混乱なし</li>
+          <li>セキュリティ・運用基準に完全準拠</li>
+          <li>本番インフラ構築 → PoC顧客を移行</li>
+        </ul>
+        <div class="badge">本番リリースも短縮（運用設計が完了済み）</div>
+      </div>
+    </div>
+    <div class="page-num dark">4 / 7</div>
+  </div>
+</div>
+
+<!-- SLIDE 5: Timeline -->
+<div class="slide content-slide" id="s5">
+  <div class="slide-inner">
+    <div class="slide-title">リードタイム比較</div>
+    <div class="slide-sub">PoC先行型なら、全工程が大幅に短縮される</div>
+    <div class="timeline">
+      <div class="tl-group">
+        <div class="tl-label-row">
+          <span class="tl-label-tag old">従来プロセス</span>
+          <span class="tl-duration">合計 6〜9ヶ月</span>
+        </div>
+        <div class="tl-bar-container">
+          <div class="tl-bar old1">要件定義</div>
+          <div class="tl-bar old2">設計・開発</div>
+          <div class="tl-bar old3">テスト</div>
+          <div class="tl-bar old4">運用設計</div>
+        </div>
+      </div>
+      <div class="tl-group">
+        <div class="tl-label-row">
+          <span class="tl-label-tag new">PoC先行型</span>
+          <span class="tl-duration">合計 2〜4ヶ月（PoC販売は即時）</span>
+        </div>
+        <div class="tl-bar-container">
+          <div class="tl-bar new1" style="font-size:9px;">承認</div>
+          <div class="tl-bar new2">PoC販売</div>
+          <div class="tl-bar new3">正式版開発</div>
+          <div class="tl-bar new4">移行</div>
+        </div>
+      </div>
+      <div class="tl-months">
+        <span>0ヶ月</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span>
+      </div>
+      <div class="tl-legend">
+        <div class="tl-legend-item"><div class="tl-legend-dot" style="background:var(--accent)"></div>PoC期間中に運用設計が完了</div>
+        <div class="tl-legend-item"><div class="tl-legend-dot" style="background:var(--navy2)"></div>仕様確定済みで手戻りなし</div>
+        <div class="tl-legend-item"><div class="tl-legend-dot" style="background:var(--green)"></div>リリース後の混乱なし</div>
+      </div>
+    </div>
+    <div class="savings-callout">
+      <div class="savings-num">−50%</div>
+      <div class="savings-text">
+        <strong>従来比で開発期間を半分以下に短縮。</strong><br>
+        さらに、運用設計がPoC中に完了するため、正式版リリース後の「運用立ち上げ期間」もゼロに。
+      </div>
+    </div>
+    <div class="page-num dark">5 / 7</div>
+  </div>
+</div>
+
+<!-- SLIDE 6: Roles -->
+<div class="slide content-slide" id="s6">
+  <div class="slide-inner">
+    <div class="slide-title">役割分担の明確化</div>
+    <div class="slide-sub">各部門が本来の強みを発揮する体制</div>
+    <table class="role-table">
+      <tr>
+        <th style="width:16%">役割</th>
+        <th style="width:20%">担当</th>
+        <th>内容</th>
+      </tr>
+      <tr>
+        <td><span class="role-label" style="color:var(--accent)">企画・検証</span></td>
+        <td>PdM<br>（営業企画部）</td>
+        <td>市場調査、企画立案、AIによるプロトタイプ開発、PoC販売、顧客フィードバック収集（PMと連携）</td>
+      </tr>
+      <tr>
+        <td><span class="role-label" style="color:#2196F3">PoC推進サブ</span></td>
+        <td>PM<br>（プロダクト推進部）</td>
+        <td>PoC段階でのプロダクト推進支援、要件整理、開発部との連携調整</td>
+      </tr>
+      <tr>
+        <td><span class="role-label" style="color:var(--navy)">正式版開発</span></td>
+        <td>開発部</td>
+        <td>セキュリティ基準適合、本番インフラ構築、コードレビュー・再設計、保守運用</td>
+      </tr>
+      <tr>
+        <td><span class="role-label" style="color:var(--green)">セキュリティ</span></td>
+        <td>運用部</td>
+        <td>セキュリティ監査、社内基準適合確認、運用ルール策定</td>
+      </tr>
+      <tr>
+        <td><span class="role-label" style="color:#7C3AED">営業・拡販</span></td>
+        <td>営業部</td>
+        <td>正式版リリース後の本格的な販売活動・顧客開拓</td>
+      </tr>
+    </table>
+    <div class="note-box">
+      開発部は「正式版の構築者」として最初から位置づけ。<br>
+      PdMが先にPoCで市場を検証することで、開発部は確度の高い仕様で開発に着手できる。
+    </div>
+    <div class="page-num dark">6 / 7</div>
+  </div>
+</div>
+
+<!-- SLIDE 7: Ask -->
+<div class="slide s7" id="s7">
+  <div class="slide-inner">
+    <div class="slide-title">ご判断いただきたい事項</div>
+    <div class="ask-item">
+      <div class="ask-num">1</div>
+      <div class="ask-text">PoC先行型開発フローでランチケの先行販売を承認</div>
+    </div>
+    <div class="ask-item">
+      <div class="ask-num">2</div>
+      <div class="ask-text">PdM主導のPoC先行体制の承認</div>
+    </div>
+    <div class="ask-item">
+      <div class="ask-num">3</div>
+      <div class="ask-text">開発部への正式版構築依頼の方針決定</div>
+    </div>
+    <div class="ask-item">
+      <div class="ask-num">4</div>
+      <div class="ask-text">PoC販売開始の目標時期（5月を提案）</div>
+    </div>
+    <div class="page-num">7 / 7</div>
+  </div>
+</div>
+
+<script>
+// Highlight active nav link based on scroll position
+const slides = document.querySelectorAll('.slide');
+const navLinks = document.querySelectorAll('.slide-nav a');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      navLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+      });
+    }
+  });
+}, { threshold: 0.5 });
+
+slides.forEach(slide => observer.observe(slide));
+</script>
+
+</body>
+</html>
