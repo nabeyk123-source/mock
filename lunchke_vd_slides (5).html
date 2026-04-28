@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ランチケ - 下期リカバリー施策</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0F2B46;--navy2:#183D5E;--navy3:#1E4D73;
+  --accent:#E8913A;--accent-light:#FFF3E6;
+  --green:#1B9A5A;--green-light:#E8F7EE;
+  --red:#D63031;--red-light:#FDE8E8;
+  --blue:#3B82F6;--blue-light:#EFF6FF;
+  --light:#F5F7FA;--white:#FFFFFF;
+  --dark:#1A2A3A;--mid:#6B7B8D;--border:#E2E8F0;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-snap-type:y mandatory;overflow-y:scroll;scroll-behavior:smooth;}
+body{font-family:'Noto Sans JP','DM Sans',sans-serif;background:#0e0e1a;color:var(--dark);}
+.slide{width:100vw;height:100vh;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;}
+.slide-inner{width:min(960px,94vw);height:min(540px,80vh);border-radius:8px;overflow:hidden;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.4);}
+.pn{position:absolute;bottom:12px;right:20px;font-size:11px;font-family:'DM Sans',sans-serif;color:rgba(0,0,0,0.25);z-index:10;pointer-events:none;}
+.pn.w{color:rgba(255,255,255,0.3);}
+
+.slide-nav{position:fixed;bottom:0;left:0;right:0;z-index:200;display:flex;justify-content:center;padding:8px 12px;background:rgba(10,10,26,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,0.06);gap:3px;}
+.slide-nav a{padding:6px 10px;border-radius:6px;font-size:10px;font-weight:600;color:rgba(255,255,255,0.45);text-decoration:none;transition:all 0.2s;white-space:nowrap;}
+.slide-nav a:hover{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.9);}
+.slide-nav a.active{background:var(--accent);color:var(--white);}
+
+/* Title */
+.s-title .slide-inner{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 60%,var(--navy3) 100%);display:flex;flex-direction:column;justify-content:center;padding:0 80px;}
+.s-title .slide-inner::before{content:'';position:absolute;right:-100px;top:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(232,145,58,0.08) 0%,transparent 70%);border-radius:50%;}
+.s-title .label{font-size:12px;color:rgba(255,255,255,0.4);letter-spacing:3px;margin-bottom:16px;}
+.s-title h1{font-size:42px;font-weight:900;color:var(--white);line-height:1.2;margin-bottom:8px;}
+.s-title .subtitle{font-size:18px;color:rgba(255,255,255,0.6);margin-bottom:32px;}
+.s-title .divider{width:80px;height:3px;background:var(--accent);margin-bottom:32px;}
+.s-title .meta{font-size:14px;color:rgba(255,255,255,0.35);line-height:1.8;}
+
+/* Content */
+.ct .slide-inner{background:var(--white);padding:40px 56px;}
+.st{font-size:26px;font-weight:900;color:var(--dark);margin-bottom:6px;}
+.ss{font-size:13px;color:var(--mid);margin-bottom:18px;}
+
+.alert{display:flex;align-items:center;gap:10px;padding:12px 20px;border-radius:8px;border-left:4px solid;margin-bottom:18px;font-size:13px;font-weight:500;}
+.alert.danger{background:var(--red-light);border-color:var(--red);color:#922;}
+
+.cmp-row{display:flex;gap:20px;}
+.cmp{flex:1;border-radius:12px;padding:24px;}
+.cmp.old{background:var(--light);border:1px solid var(--border);}
+.cmp.new{background:var(--green-light);border:1px solid rgba(27,154,90,0.2);}
+.cmp .cmp-label{font-size:12px;font-weight:700;color:var(--mid);margin-bottom:6px;}
+.cmp .big{font-size:40px;font-weight:900;font-family:'DM Sans',sans-serif;line-height:1.1;}
+.cmp.old .big{color:var(--red);}
+.cmp.new .big{color:var(--green);}
+.cmp .detail{font-size:12px;color:var(--mid);margin-top:6px;line-height:1.6;}
+
+.ig{display:grid;grid-template-columns:130px 1fr;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;}
+.ig .l{background:var(--navy);color:var(--white);padding:11px 14px;font-size:12px;font-weight:700;display:flex;align-items:center;border-bottom:1px solid rgba(255,255,255,0.1);}
+.ig .v{padding:11px 16px;font-size:12px;border-bottom:1px solid var(--border);display:flex;align-items:center;}
+.ig .v.hl{color:var(--green);font-weight:700;}
+
+/* Phase */
+.phase-row{display:flex;gap:14px;}
+.phase-card{flex:1;border-radius:12px;padding:18px;position:relative;overflow:hidden;}
+.phase-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;}
+.phase-card.p1{background:var(--accent-light);}
+.phase-card.p1::before{background:var(--accent);}
+.phase-card.p2{background:var(--light);}
+.phase-card.p2::before{background:var(--navy);}
+.phase-card h3{font-size:15px;font-weight:800;margin-bottom:3px;}
+.phase-card.p1 h3{color:var(--accent);}
+.phase-card.p2 h3{color:var(--navy);}
+.phase-card .who{font-size:10px;color:var(--mid);margin-bottom:10px;}
+.phase-card ul{list-style:none;padding:0;}
+.phase-card li{font-size:11px;color:var(--dark);padding:2px 0;display:flex;align-items:baseline;gap:6px;}
+.phase-card li::before{content:'●';font-size:7px;flex-shrink:0;}
+.phase-card.p1 li::before{color:var(--accent);}
+.phase-card.p2 li::before{color:var(--navy);}
+.phase-card .badge{margin-top:8px;padding:5px 12px;border-radius:6px;font-size:10px;font-weight:700;text-align:center;}
+.phase-card.p1 .badge{background:var(--white);color:var(--accent);}
+.phase-card.p2 .badge{background:var(--white);color:var(--navy);}
+.phase-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:48px;flex-shrink:0;}
+.phase-arrow .arrow-icon{font-size:24px;color:var(--navy);font-weight:700;}
+.phase-arrow .arrow-label{font-size:8px;color:var(--mid);text-align:center;line-height:1.3;}
+
+/* Timeline */
+.tl-group{margin-bottom:28px;}
+.tl-label-row{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+.tl-tag{padding:4px 12px;border-radius:4px;font-size:12px;font-weight:700;}
+.tl-tag.old{background:var(--red-light);color:var(--red);}
+.tl-tag.new{background:var(--green-light);color:var(--green);}
+.tl-dur{font-size:12px;color:var(--mid);}
+.tl-bar-box{position:relative;height:40px;}
+.tl-bar{position:absolute;height:32px;border-radius:6px;display:flex;align-items:center;padding:0 10px;font-size:10px;font-weight:600;color:var(--white);top:4px;}
+.tl-months{display:flex;justify-content:space-between;font-size:10px;color:var(--mid);margin-top:6px;}
+.tl-legend{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;}
+.tl-legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--dark);}
+.tl-legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+.savings{margin-top:16px;background:var(--green-light);border-radius:10px;padding:14px 20px;display:flex;align-items:center;gap:16px;}
+.savings-num{font-size:32px;font-weight:900;font-family:'DM Sans',sans-serif;color:var(--green);}
+.savings-text{font-size:12px;color:var(--dark);line-height:1.6;}
+
+/* Strategy */
+.strat-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;}
+.strat-card{border-radius:10px;padding:18px;border:1px solid var(--border);}
+.strat-card h3{font-size:14px;font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.strat-card p{font-size:11px;color:var(--mid);line-height:1.6;}
+.strat-card .val{font-size:26px;font-weight:900;font-family:'DM Sans',sans-serif;margin:6px 0 4px;}
+.callout{padding:12px 20px;border-radius:10px;font-size:12px;font-weight:700;text-align:center;}
+.callout.green{background:var(--green-light);color:var(--green);}
+.callout.blue{background:var(--blue-light);color:var(--blue);}
+
+/* Sim */
+.sim-table{width:100%;border-collapse:collapse;border-radius:8px;overflow:hidden;margin-bottom:14px;}
+.sim-table th{background:var(--navy);color:var(--white);font-size:11px;font-weight:700;padding:9px 12px;text-align:left;}
+.sim-table td{padding:8px 12px;font-size:12px;border-bottom:1px solid var(--border);}
+.sim-table tr:last-child td{border-bottom:none;}
+.sim-table .total td{background:var(--green-light);font-weight:700;color:var(--green);}
+.sim-table .stock td{background:var(--blue-light);font-weight:700;color:var(--blue);}
+
+/* Risk */
+.risk-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.risk-card{border-radius:10px;padding:14px 16px;border:1px solid var(--border);}
+.risk-card h4{font-size:12px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.risk-card .rlv{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;}
+.rlv.high{background:var(--red-light);color:var(--red);}
+.rlv.mid{background:var(--accent-light);color:var(--accent);}
+.rlv.low{background:var(--green-light);color:var(--green);}
+.risk-card p{font-size:10px;color:var(--mid);line-height:1.4;margin-top:3px;}
+.risk-card .mit{font-size:10px;color:var(--navy);font-weight:600;margin-top:4px;}
+
+/* Roles */
+.role-table{width:100%;border-collapse:collapse;border-radius:8px;overflow:hidden;}
+.role-table th{background:var(--navy);color:var(--white);font-size:11px;font-weight:700;padding:9px 14px;text-align:left;}
+.role-table td{padding:8px 14px;font-size:11px;border-bottom:1px solid var(--border);vertical-align:top;}
+.role-table tr:last-child td{border-bottom:none;}
+.rl{font-weight:700;font-size:12px;}
+.note-box{margin-top:12px;background:var(--light);padding:10px 16px;border-radius:8px;font-size:11px;color:var(--navy);font-weight:600;line-height:1.7;}
+
+/* Ask */
+.s-ask .slide-inner{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);padding:48px 60px;display:flex;flex-direction:column;}
+.s-ask .st{color:var(--white);margin-bottom:24px;}
+.ask-item{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.06);border-radius:10px;padding:14px 20px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.08);}
+.ask-num{font-size:22px;font-weight:900;font-family:'DM Sans',sans-serif;color:var(--accent);width:32px;text-align:center;flex-shrink:0;}
+.ask-text{font-size:15px;color:var(--white);font-weight:500;}
+
+@media(max-width:768px){
+  .slide-inner{width:100vw;height:100vh;border-radius:0;box-shadow:none;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+  .s-title .slide-inner{padding:80px 28px 40px;justify-content:flex-start;}
+  .s-title h1{font-size:28px;} .s-title .subtitle{font-size:15px;}
+  .ct .slide-inner{padding:56px 20px 60px;}
+  .st{font-size:22px;}
+  .cmp-row{flex-direction:column;gap:12px;} .cmp .big{font-size:30px;}
+  .strat-grid{grid-template-columns:1fr;}
+  .phase-row{flex-direction:column;gap:8px;}
+  .phase-arrow{flex-direction:row;width:auto;gap:8px;padding:4px 0;}
+  .phase-arrow .arrow-icon{transform:rotate(90deg);}
+  .risk-grid{grid-template-columns:1fr;}
+  .tl-bar{font-size:8px!important;padding:0 6px;}
+  .savings{flex-direction:column;gap:8px;} .savings-num{font-size:24px;}
+  .slide-nav{padding:6px 8px;gap:2px;overflow-x:auto;justify-content:flex-start;}
+  .slide-nav a{padding:6px 8px;font-size:9px;flex-shrink:0;}
+  .pn{bottom:8px;right:12px;font-size:10px;}
+  .s-ask .slide-inner{padding:56px 20px 60px;}
+  .ask-item{padding:12px 14px;} .ask-text{font-size:13px;}
+  .ig{grid-template-columns:90px 1fr;}
+}
+</style>
+</head>
+<body>
+
+<nav class="slide-nav">
+  <a href="#s1">表紙</a>
+  <a href="#s2">背景</a>
+  <a href="#s3">概要</a>
+  <a href="#s4">開発フロー</a>
+  <a href="#s5">リードタイム</a>
+  <a href="#s6">営業戦略</a>
+  <a href="#s7">売上試算</a>
+  <a href="#s8">リスク</a>
+  <a href="#s9">役割分担</a>
+  <a href="#s10">ご判断事項</a>
+</nav>
+
+<!-- 1. Title -->
+<div class="slide s-title" id="s1">
+  <div class="slide-inner">
+    <div class="label">下期リカバリー施策</div>
+    <h1>ランチケ PoC販売</h1>
+    <div class="subtitle">食事補助福利厚生サービスによる下期売上貢献</div>
+    <div class="divider"></div>
+    <div class="meta">株式会社バリューデザイン　営業企画部<br>2026年4月</div>
+    <div class="pn w">1 / 10</div>
+  </div>
+</div>
+
+<!-- 2. Background -->
+<div class="slide ct" id="s2">
+  <div class="slide-inner">
+    <div class="st">背景：市場機会</div>
+    <div class="alert danger">🔥 競合エデンレッドジャパン「チケットレストラン」がTV-CM展開中。市場が動いている今がチャンスです。</div>
+    <div class="cmp-row">
+      <div class="cmp old">
+        <div class="cmp-label">通常の新サービス開発</div>
+        <div class="big">6〜9ヶ月</div>
+        <div class="detail">要件定義→設計→開発→テスト→運用設計<br>下期の売上貢献は困難です</div>
+      </div>
+      <div class="cmp new">
+        <div class="cmp-label">ランチケ（サービス提供中）</div>
+        <div class="big">システム化で拡大</div>
+        <div class="detail">サービスは既にリリース済み（現在アナログ運用）<br>管理画面＋従業員ポータルのシステム化により本格拡販が可能に</div>
+      </div>
+    </div>
+    <div class="pn">2 / 10</div>
+  </div>
+</div>
+
+<!-- 3. Overview -->
+<div class="slide ct" id="s3">
+  <div class="slide-inner">
+    <div class="st">ランチケとは</div>
+    <div class="ss">VDの既存決済基盤を活用した食事補助福利厚生サービス（サービス提供中・アナログ運用）</div>
+    <div class="ig">
+      <div class="l">サービス名</div><div class="v">ランチケ</div>
+      <div class="l">カテゴリ</div><div class="v">食事補助型 福利厚生サービス</div>
+      <div class="l">決済手段</div><div class="v">ドコモ iD ／ VD独自Pay</div>
+      <div class="l">競合</div><div class="v">エデンレッドジャパン「チケットレストラン」（TV-CM展開中）</div>
+      <div class="l">現在の状況</div><div class="v">サービスはリリース済み。カードID紐づけ・配布、Excel連携による入金等をアナログで運用中</div>
+      <div class="l">カード</div><div class="v hl">📦 6月12日に1万枚入荷予定</div>
+      <div class="l">販売開始</div><div class="v hl">📅 7月〜</div>
+      <div class="l">契約形態</div><div class="v">1年更新</div>
+    </div>
+    <div class="callout blue">※ 画面紹介は別紙「ランチケ 画面紹介資料」をご参照ください</div>
+    <div class="pn">3 / 10</div>
+  </div>
+</div>
+
+<!-- 4. Phase (moved up) -->
+<div class="slide ct" id="s4">
+  <div class="slide-inner">
+    <div class="st">開発フロー：アナログ運用 → システム化PoC → 正式版</div>
+    <div class="ss">現在アナログ運用中の業務を、AIを活用して管理画面＋従業員ポータルとしてシステム化。開発部が正式版を構築・移行いたします。</div>
+    <div class="phase-row">
+      <div class="phase-card p1">
+        <h3>Phase 1：PoC先行販売</h3>
+        <div class="who">担当：PdM（営業企画部）　サブ：PM（プロダクト推進部）</div>
+        <ul>
+          <li>AIを活用し管理画面・ポータルを早期開発</li>
+          <li>アナログ運用をシステムに置き換え</li>
+          <li>7月よりシステム化済みサービスとして拡販</li>
+          <li>顧客フィードバック収集・仕様の確定</li>
+          <li>運用設計・顧客対応フローを先行確立</li>
+        </ul>
+        <div class="badge">PoC期間中に運用が固まります</div>
+      </div>
+      <div class="phase-arrow">
+        <div class="arrow-icon">→</div>
+        <div class="arrow-label">実績・運用<br>ノウハウを<br>引き継ぎ</div>
+      </div>
+      <div class="phase-card p2">
+        <h3>Phase 2：正式版リリース</h3>
+        <div class="who">担当：開発部（正式な製品として構築）</div>
+        <ul>
+          <li>仕様確定済み → 手戻りなく開発着手</li>
+          <li>運用フロー確立済み → リリース後の混乱なし</li>
+          <li>セキュリティ・運用基準に完全準拠</li>
+          <li>本番インフラ構築 → PoC顧客を移行</li>
+        </ul>
+        <div class="badge">本番リリースも短縮（運用設計が完了済み）</div>
+      </div>
+    </div>
+    <div class="pn">4 / 10</div>
+  </div>
+</div>
+
+<!-- 5. Timeline (new) -->
+<div class="slide ct" id="s5">
+  <div class="slide-inner">
+    <div class="st">リードタイム比較</div>
+    <div class="ss">既存サービスのシステム化のため、ゼロからの開発と比べ全工程が大幅に短縮されます</div>
+    <div class="tl-group">
+      <div class="tl-label-row">
+        <span class="tl-tag old">従来プロセス</span>
+        <span class="tl-dur">合計 6〜9ヶ月</span>
+      </div>
+      <div class="tl-bar-box">
+        <div class="tl-bar" style="background:#E57373;left:0;width:22%;">要件定義</div>
+        <div class="tl-bar" style="background:#EF5350;left:22%;width:38%;">設計・開発</div>
+        <div class="tl-bar" style="background:#F44336;left:60%;width:20%;">テスト</div>
+        <div class="tl-bar" style="background:#D32F2F;left:80%;width:20%;">運用設計</div>
+      </div>
+    </div>
+    <div class="tl-group">
+      <div class="tl-label-row">
+        <span class="tl-tag new">AI活用 PoC先行型</span>
+        <span class="tl-dur">合計 2〜4ヶ月（PoC販売は即時）</span>
+      </div>
+      <div class="tl-bar-box">
+        <div class="tl-bar" style="background:var(--accent);left:0;width:6%;font-size:9px;">承認</div>
+        <div class="tl-bar" style="background:#F0A050;left:6%;width:12%;">PoC販売</div>
+        <div class="tl-bar" style="background:var(--navy2);left:18%;width:20%;">正式版開発</div>
+        <div class="tl-bar" style="background:var(--green);left:38%;width:10%;">移行</div>
+      </div>
+    </div>
+    <div class="tl-months"><span>0ヶ月</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></div>
+    <div class="tl-legend">
+      <div class="tl-legend-item"><div class="tl-legend-dot" style="background:var(--accent)"></div>PoC期間中に運用設計が完了</div>
+      <div class="tl-legend-item"><div class="tl-legend-dot" style="background:var(--navy2)"></div>仕様確定済みで手戻りなし</div>
+      <div class="tl-legend-item"><div class="tl-legend-dot" style="background:var(--green)"></div>リリース後の混乱なし</div>
+    </div>
+    <div class="savings">
+      <div class="savings-num">−50%</div>
+      <div class="savings-text"><strong>従来比で開発期間を半分以下に短縮。</strong><br>さらに、運用設計がPoC中に完了するため、正式版リリース後の「運用立ち上げ期間」もゼロになります。</div>
+    </div>
+    <div class="pn">5 / 10</div>
+  </div>
+</div>
+
+<!-- 6. Strategy -->
+<div class="slide ct" id="s6">
+  <div class="slide-inner">
+    <div class="st">営業戦略：初期費用先行型モデル</div>
+    <div class="ss">下期に確実に売上を立てつつ、来期のストック収益を確保する料金設計</div>
+    <div class="strat-grid">
+      <div class="strat-card" style="background:var(--accent-light);">
+        <h3 style="color:var(--accent);">💰 初期費用（下期売上）</h3>
+        <div class="val" style="color:var(--accent);">¥2,000 <span style="font-size:14px;font-weight:400;">/人</span></div>
+        <p>月額3ヶ月分相当を初期費用として先行回収。<br>カード配布・セットアップ費用として設定。<br>導入企業にとっても「月額無料期間あり」で導入しやすい設計です。</p>
+      </div>
+      <div class="strat-card" style="background:var(--blue-light);">
+        <h3 style="color:var(--blue);">🎁 年内月額無料（来期への布石）</h3>
+        <div class="val" style="color:var(--blue);">¥0 <span style="font-size:14px;font-weight:400;">（7月〜12月・年内無料）</span></div>
+        <p>7月・8月スタート企業限定で年内月額無料。<br>無料期間中に利用実績を積み、解約しにくい状態を構築。<br>来年1月から月額 ¥600/人 の課金開始。契約は1年更新。</p>
+      </div>
+    </div>
+    <div class="callout green">導入企業のメリット：初期費用のみで年内はリスクなくお試しいただけます（7・8月スタート限定）</div>
+    <div class="pn">6 / 10</div>
+  </div>
+</div>
+
+<!-- 7. Revenue -->
+<div class="slide ct" id="s7">
+  <div class="slide-inner">
+    <div class="st">売上シミュレーション</div>
+    <div class="ss">目標：1万人獲得（7月販売開始）</div>
+    <table class="sim-table">
+      <tr><th>項目</th><th>算出根拠</th><th>金額</th></tr>
+      <tr><td>初期費用（下期売上）</td><td>10,000人 × ¥2,000</td><td style="font-weight:700;color:var(--accent);">¥20,000,000</td></tr>
+      <tr><td>月額売上（7〜12月）</td><td>年内無料（7・8月スタート企業限定）</td><td style="color:var(--mid);">¥0</td></tr>
+      <tr class="total"><td>下期売上合計</td><td></td><td>¥20,000,000</td></tr>
+    </table>
+    <table class="sim-table" style="margin-top:8px;">
+      <tr><th colspan="3" style="background:var(--blue);">来期以降（月額課金開始 1月〜）</th></tr>
+      <tr><td>月額売上</td><td>10,000人 × ¥600</td><td style="font-weight:700;color:var(--blue);">¥6,000,000 /月</td></tr>
+      <tr class="stock"><td>年間ストック収益</td><td>¥6,000,000 × 12ヶ月</td><td>¥72,000,000 /年</td></tr>
+    </table>
+    <div style="display:flex;gap:12px;margin-top:12px;">
+      <div class="callout green" style="flex:1;">下期に<strong>2,000万円</strong>の売上貢献</div>
+      <div class="callout blue" style="flex:1;">来期から<strong>月600万円</strong>のストック収益（年7,200万円）</div>
+    </div>
+    <div class="pn">7 / 10</div>
+  </div>
+</div>
+
+<!-- 8. Risk -->
+<div class="slide ct" id="s8">
+  <div class="slide-inner">
+    <div class="st">リスクと対策</div>
+    <div class="ss">想定されるリスクと、それぞれの軽減策</div>
+    <div class="risk-grid">
+      <div class="risk-card">
+        <h4>📋 PoC品質でのシステム提供 <span class="rlv mid">中</span></h4>
+        <p>AIを活用した早期システム化のため、正式な社内開発プロセスを経ておりません。ただしサービス自体は提供実績があり、システム化による業務効率化が主な変更点です。</p>
+        <div class="mit">→ 対策：PoC期間と位置づけ、Phase 2で開発部が正式版を構築。運用部がセキュリティ監査を実施。</div>
+      </div>
+      <div class="risk-card">
+        <h4>🏢 1万人獲得の達成 <span class="rlv mid">中</span></h4>
+        <p>新サービスのため認知度が低く、短期間での1万人獲得には営業リソースの集中が必要です。</p>
+        <div class="mit">→ 対策：既存VD顧客への提案（クロスセル）を優先。年内無料＋初期費用のみで導入ハードルを低減。</div>
+      </div>
+      <div class="risk-card">
+        <h4>⏰ カード配布のタイミング <span class="rlv low">低</span></h4>
+        <p>6月12日に1万枚入荷予定。顧客への配布スケジュールの調整が必要です。</p>
+        <div class="mit">→ 対策：入荷後すぐに配布準備を開始。7月・8月スタートに合わせて順次配布。</div>
+      </div>
+      <div class="risk-card">
+        <h4>🔄 無料期間後の解約 <span class="rlv low">低</span></h4>
+        <p>年内無料終了後に解約されると来期のストック収益が減少します。</p>
+        <div class="mit">→ 対策：契約は1年更新のため初年度の解約は発生しない設計。無料期間中に従業員へ定着させ、更新率を高めます。</div>
+      </div>
+    </div>
+    <div class="pn">8 / 10</div>
+  </div>
+</div>
+
+<!-- 9. Roles -->
+<div class="slide ct" id="s9">
+  <div class="slide-inner">
+    <div class="st">役割分担</div>
+    <div class="ss">各部門が本来の強みを発揮する体制</div>
+    <table class="role-table">
+      <tr><th style="width:16%">役割</th><th style="width:20%">担当</th><th>内容</th></tr>
+      <tr><td><span class="rl" style="color:var(--accent)">企画・検証</span></td><td>PdM<br>（営業企画部）</td><td>企画立案、AIによるプロトタイプ開発、PoC販売、顧客フィードバック収集（PMと連携）</td></tr>
+      <tr><td><span class="rl" style="color:var(--blue)">PoC推進サブ</span></td><td>PM<br>（プロダクト推進部）</td><td>PoC段階でのプロダクト推進支援、要件整理、開発部との連携調整</td></tr>
+      <tr><td><span class="rl" style="color:var(--navy)">正式版開発</span></td><td>開発部</td><td>セキュリティ基準適合、本番インフラ構築、コードレビュー・再設計、保守運用</td></tr>
+      <tr><td><span class="rl" style="color:var(--green)">セキュリティ</span></td><td>運用部</td><td>セキュリティ監査、社内基準適合確認、運用ルール策定</td></tr>
+      <tr><td><span class="rl" style="color:#7C3AED">営業・拡販</span></td><td>営業部</td><td>既存VD顧客へのクロスセル提案、新規顧客開拓</td></tr>
+    </table>
+    <div class="note-box">開発部は「正式版の構築者」として最初から位置づけ。<br>PdMが先にPoCで市場を検証することで、開発部は確度の高い仕様で開発に着手できます。</div>
+    <div class="pn">9 / 10</div>
+  </div>
+</div>
+
+<!-- 10. Ask -->
+<div class="slide s-ask" id="s10">
+  <div class="slide-inner">
+    <div class="st">ご判断いただきたい事項</div>
+    <div class="ask-item"><div class="ask-num">1</div><div class="ask-text">下期リカバリー施策としてランチケPoC販売の承認</div></div>
+    <div class="ask-item"><div class="ask-num">2</div><div class="ask-text">初期費用先行型の料金モデルの承認</div></div>
+    <div class="ask-item"><div class="ask-num">3</div><div class="ask-text">PdM主導のPoC先行体制の承認</div></div>
+    <div class="ask-item"><div class="ask-num">4</div><div class="ask-text">開発部への正式版構築依頼の方針決定</div></div>
+    <div class="pn w">10 / 10</div>
+  </div>
+</div>
+
+<script>
+const slides=document.querySelectorAll('.slide');
+const navLinks=document.querySelectorAll('.slide-nav a');
+const observer=new IntersectionObserver((entries)=>{entries.forEach(entry=>{if(entry.isIntersecting){const id=entry.target.id;navLinks.forEach(link=>{link.classList.toggle('active',link.getAttribute('href')==='#'+id);});}});},{threshold:0.5});
+slides.forEach(slide=>observer.observe(slide));
+</script>
+</body>
+</html>
