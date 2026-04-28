@@ -138,6 +138,24 @@ body{font-family:'Noto Sans JP','DM Sans',sans-serif;background:#0e0e1a;color:va
 .rl{font-weight:700;font-size:12px;}
 .note-box{margin-top:12px;background:var(--light);padding:10px 16px;border-radius:8px;font-size:11px;color:var(--navy);font-weight:600;line-height:1.7;}
 
+
+/* Schedule */
+.sched-track{position:relative;margin-top:16px;}
+.sched-row{display:flex;align-items:center;margin-bottom:10px;}
+.sched-label{width:140px;flex-shrink:0;font-size:11px;font-weight:700;color:var(--dark);text-align:right;padding-right:14px;}
+.sched-bar-area{flex:1;position:relative;height:36px;}
+.sched-bar{position:absolute;height:32px;border-radius:6px;display:flex;align-items:center;padding:0 10px;font-size:10px;font-weight:600;color:var(--white);top:2px;}
+.sched-months{display:flex;margin-left:140px;}
+.sched-months span{flex:1;font-size:10px;color:var(--mid);text-align:center;padding:4px 0;border-left:1px solid var(--border);}
+.sched-months span:first-child{border-left:none;}
+.sched-grid-lines{position:absolute;top:0;bottom:0;left:0;right:0;display:flex;}
+.sched-grid-lines span{flex:1;border-left:1px dashed rgba(0,0,0,0.06);}
+.sched-grid-lines span:first-child{border-left:none;}
+.sched-milestone{position:absolute;top:-2px;width:2px;height:40px;background:var(--red);z-index:2;}
+.sched-milestone-label{position:absolute;top:-16px;font-size:9px;color:var(--red);font-weight:700;white-space:nowrap;}
+.sched-callout{margin-top:16px;background:var(--accent-light);border-radius:10px;padding:14px 20px;font-size:12px;color:#92400E;line-height:1.7;}
+.sched-callout strong{color:var(--accent);}
+
 /* Ask */
 .s-ask .slide-inner{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);padding:48px 60px;display:flex;flex-direction:column;}
 .s-ask .st{color:var(--white);margin-bottom:24px;}
@@ -180,7 +198,8 @@ body{font-family:'Noto Sans JP','DM Sans',sans-serif;background:#0e0e1a;color:va
   <a href="#s7">売上試算</a>
   <a href="#s8">リスク</a>
   <a href="#s9">役割分担</a>
-  <a href="#s10">ご判断事項</a>
+  <a href="#s10">スケジュール</a>
+  <a href="#s11">ご判断事項</a>
 </nav>
 
 <!-- 1. Title -->
@@ -191,7 +210,7 @@ body{font-family:'Noto Sans JP','DM Sans',sans-serif;background:#0e0e1a;color:va
     <div class="subtitle">食事補助福利厚生サービスによる下期売上貢献</div>
     <div class="divider"></div>
     <div class="meta">株式会社バリューデザイン　営業企画部<br>2026年4月</div>
-    <div class="pn w">1 / 10</div>
+    <div class="pn w">1 / 11</div>
   </div>
 </div>
 
@@ -212,7 +231,7 @@ body{font-family:'Noto Sans JP','DM Sans',sans-serif;background:#0e0e1a;color:va
         <div class="detail">サービスは既にリリース済み（現在アナログ運用）<br>管理画面＋従業員ポータルのシステム化により本格拡販が可能に</div>
       </div>
     </div>
-    <div class="pn">2 / 10</div>
+    <div class="pn">2 / 11</div>
   </div>
 </div>
 
@@ -232,7 +251,7 @@ body{font-family:'Noto Sans JP','DM Sans',sans-serif;background:#0e0e1a;color:va
       <div class="l">契約形態</div><div class="v">1年更新</div>
     </div>
     <div class="callout blue">※ 画面紹介は別紙「ランチケ 画面紹介資料」をご参照ください</div>
-    <div class="pn">3 / 10</div>
+    <div class="pn">3 / 11</div>
   </div>
 </div>
 
@@ -270,7 +289,7 @@ body{font-family:'Noto Sans JP','DM Sans',sans-serif;background:#0e0e1a;color:va
         <div class="badge">本番リリースも短縮（運用設計が完了済み）</div>
       </div>
     </div>
-    <div class="pn">4 / 10</div>
+    <div class="pn">4 / 11</div>
   </div>
 </div>
 
@@ -313,7 +332,7 @@ body{font-family:'Noto Sans JP','DM Sans',sans-serif;background:#0e0e1a;color:va
       <div class="savings-num">−50%</div>
       <div class="savings-text"><strong>従来比で開発期間を半分以下に短縮。</strong><br>さらに、運用設計がPoC中に完了するため、正式版リリース後の「運用立ち上げ期間」もゼロになります。</div>
     </div>
-    <div class="pn">5 / 10</div>
+    <div class="pn">5 / 11</div>
   </div>
 </div>
 
@@ -335,7 +354,7 @@ body{font-family:'Noto Sans JP','DM Sans',sans-serif;background:#0e0e1a;color:va
       </div>
     </div>
     <div class="callout green">導入企業のメリット：初期費用のみで年内はリスクなくお試しいただけます（7・8月スタート限定）</div>
-    <div class="pn">6 / 10</div>
+    <div class="pn">6 / 11</div>
   </div>
 </div>
 
@@ -359,7 +378,7 @@ body{font-family:'Noto Sans JP','DM Sans',sans-serif;background:#0e0e1a;color:va
       <div class="callout green" style="flex:1;">下期に<strong>2,000万円</strong>の売上貢献</div>
       <div class="callout blue" style="flex:1;">来期から<strong>月600万円</strong>のストック収益（年7,200万円）</div>
     </div>
-    <div class="pn">7 / 10</div>
+    <div class="pn">7 / 11</div>
   </div>
 </div>
 
@@ -390,7 +409,7 @@ body{font-family:'Noto Sans JP','DM Sans',sans-serif;background:#0e0e1a;color:va
         <div class="mit">→ 対策：契約は1年更新のため初年度の解約は発生しない設計。無料期間中に従業員へ定着させ、更新率を高めます。</div>
       </div>
     </div>
-    <div class="pn">8 / 10</div>
+    <div class="pn">8 / 11</div>
   </div>
 </div>
 
@@ -408,19 +427,89 @@ body{font-family:'Noto Sans JP','DM Sans',sans-serif;background:#0e0e1a;color:va
       <tr><td><span class="rl" style="color:#7C3AED">営業・拡販</span></td><td>営業部</td><td>既存VD顧客へのクロスセル提案、新規顧客開拓</td></tr>
     </table>
     <div class="note-box">開発部は「正式版の構築者」として最初から位置づけ。<br>PdMが先にPoCで市場を検証することで、開発部は確度の高い仕様で開発に着手できます。</div>
-    <div class="pn">9 / 10</div>
+    <div class="pn">9 / 11</div>
   </div>
 </div>
 
-<!-- 10. Ask -->
-<div class="slide s-ask" id="s10">
+<!-- 10. Schedule -->
+<div class="slide ct" id="s10">
+  <div class="slide-inner">
+    <div class="st">スケジュール</div>
+    <div class="ss">5月承認→7月顧客利用開始までのロードマップ</div>
+    <div class="sched-track">
+      <div class="sched-months">
+        <span>5月</span><span>6月</span><span>7月</span><span>8月</span><span>9月</span>
+      </div>
+      <div style="position:relative;margin-left:140px;">
+        <div class="sched-grid-lines"><span></span><span></span><span></span><span></span><span></span></div>
+      </div>
+
+      <div class="sched-row">
+        <div class="sched-label">承認</div>
+        <div class="sched-bar-area">
+          <div class="sched-grid-lines"><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="sched-bar" style="background:var(--red);left:0;width:3%;">5/1</div>
+        </div>
+      </div>
+
+      <div class="sched-row">
+        <div class="sched-label">プロトタイプ開発</div>
+        <div class="sched-bar-area">
+          <div class="sched-grid-lines"><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="sched-bar" style="background:var(--accent);left:0;width:15%;">5/1〜5/15</div>
+        </div>
+      </div>
+
+      <div class="sched-row">
+        <div class="sched-label">社内運用検証</div>
+        <div class="sched-bar-area">
+          <div class="sched-grid-lines"><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="sched-bar" style="background:var(--navy2);left:15%;width:12%;">5/15〜6/5</div>
+        </div>
+      </div>
+
+      <div class="sched-row">
+        <div class="sched-label">改修・調整</div>
+        <div class="sched-bar-area">
+          <div class="sched-grid-lines"><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="sched-bar" style="background:var(--navy3);left:27%;width:8%;">〜6/15</div>
+        </div>
+      </div>
+
+      <div class="sched-row">
+        <div class="sched-label" style="color:var(--accent);">📦 カード入荷</div>
+        <div class="sched-bar-area">
+          <div class="sched-grid-lines"><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="sched-bar" style="background:var(--accent);left:24%;width:4%;font-size:9px;">6/12</div>
+        </div>
+      </div>
+
+      <div class="sched-row">
+        <div class="sched-label" style="color:var(--green);font-size:12px;">🚀 顧客利用開始</div>
+        <div class="sched-bar-area">
+          <div class="sched-grid-lines"><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="sched-bar" style="background:var(--green);left:40%;width:60%;">7/1〜 順次拡大</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sched-callout">
+      <strong>5月1日までに承認</strong>をいただければ、2ヶ月の準備期間を経て<strong>7月1日から顧客利用を開始</strong>できます。<br>
+      VD社内での運用検証を挟むことで、品質を担保した上での提供が可能です。
+    </div>
+    <div class="pn">10 / 11</div>
+  </div>
+</div>
+
+<!-- 11. Ask -->
+<div class="slide s-ask" id="s11">
   <div class="slide-inner">
     <div class="st">ご判断いただきたい事項</div>
     <div class="ask-item"><div class="ask-num">1</div><div class="ask-text">下期リカバリー施策としてランチケPoC販売の承認</div></div>
     <div class="ask-item"><div class="ask-num">2</div><div class="ask-text">初期費用先行型の料金モデルの承認</div></div>
     <div class="ask-item"><div class="ask-num">3</div><div class="ask-text">PdM主導のPoC先行体制の承認</div></div>
     <div class="ask-item"><div class="ask-num">4</div><div class="ask-text">開発部への正式版構築依頼の方針決定</div></div>
-    <div class="pn w">10 / 10</div>
+    <div class="pn w">11 / 11</div>
   </div>
 </div>
 
