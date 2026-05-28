@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>株主優待受付サイト プロトタイプ</title>
+<style>
+:root {
+  --brand: #1D9E75;
+  --brand-dark: #0F6E56;
+  --brand-light: #E1F5EE;
+  --brand-mid: #5DCAA5;
+  --gray-50: #f9f9f7;
+  --gray-100: #f1efe8;
+  --gray-200: #e0ddd4;
+  --gray-400: #9a9890;
+  --gray-600: #5f5e5a;
+  --gray-800: #2c2c2a;
+  --danger: #e24b4a;
+  --warning: #ef9f27;
+  --radius: 8px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Hiragino Sans','Meiryo',sans-serif;font-size:14px;background:#f0f0ee;color:var(--gray-800)}
+
+/* ===== SHELL ===== */
+#shell{display:flex;height:100vh;overflow:hidden}
+
+/* ===== SIDEBAR ===== */
+#sidebar{width:220px;background:var(--gray-800);display:flex;flex-direction:column;flex-shrink:0}
+#sidebar-logo{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,0.08)}
+#sidebar-logo .logo-name{color:#fff;font-size:13px;font-weight:700;line-height:1.4}
+#sidebar-logo .logo-sub{color:var(--gray-400);font-size:11px}
+.sidebar-section{padding:12px 0}
+.sidebar-label{color:var(--gray-400);font-size:10px;font-weight:700;letter-spacing:.08em;padding:0 16px 6px;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 16px;color:rgba(255,255,255,0.7);cursor:pointer;border-radius:0;transition:background .15s;font-size:13px;border-left:2px solid transparent}
+.nav-item:hover{background:rgba(255,255,255,0.06)}
+.nav-item.active{background:rgba(255,255,255,0.1);color:#fff;border-left-color:var(--brand)}
+.nav-icon{width:16px;text-align:center;font-size:14px}
+.nav-divider{height:1px;background:rgba(255,255,255,0.08);margin:4px 0}
+
+/* ===== MAIN ===== */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* ===== TOPBAR ===== */
+#topbar{height:52px;background:#fff;border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
+#topbar-left{display:flex;align-items:center;gap:8px}
+#topbar-title{font-size:15px;font-weight:700;color:var(--gray-800)}
+#topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-badge{background:var(--brand-light);color:var(--brand-dark);font-size:11px;padding:3px 8px;border-radius:10px;font-weight:700}
+.topbar-user{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--gray-600);cursor:pointer}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+
+/* ===== CONTENT ===== */
+#content{flex:1;overflow-y:auto;padding:24px}
+.screen{display:none}
+.screen.active{display:block}
+
+/* ===== SWITCHER ===== */
+#mode-switch{position:fixed;bottom:20px;right:20px;display:flex;gap:8px;z-index:100}
+.mode-btn{padding:8px 16px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:700;transition:all .2s}
+.mode-btn.active{background:var(--brand);color:#fff;box-shadow:0 4px 12px rgba(29,158,117,0.35)}
+.mode-btn:not(.active){background:#fff;color:var(--gray-600);box-shadow:var(--shadow)}
+
+/* ===== FLOW INDICATOR ===== */
+.flow-steps{display:flex;align-items:center;gap:0;margin-bottom:24px}
+.flow-step{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--gray-400)}
+.flow-step.done .step-num{background:var(--brand);color:#fff}
+.flow-step.active .step-num{background:var(--brand);color:#fff;box-shadow:0 0 0 3px var(--brand-light)}
+.flow-step.active{color:var(--brand-dark);font-weight:700}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--gray-200);color:var(--gray-600);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.flow-line{width:32px;height:1px;background:var(--gray-200);margin:0 4px}
+.flow-line.done{background:var(--brand)}
+
+/* ===== CARDS ===== */
+.card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;margin-bottom:16px}
+.card-title{font-size:15px;font-weight:700;margin-bottom:16px;color:var(--gray-800)}
+.card-sm{padding:16px}
+
+/* ===== FORM ===== */
+.form-group{margin-bottom:16px}
+.form-label{font-size:12px;font-weight:700;color:var(--gray-600);margin-bottom:6px;display:block}
+.form-input{width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:var(--radius);font-size:14px;outline:none;transition:border .15s;background:#fff}
+.form-input:focus{border-color:var(--brand)}
+.form-hint{font-size:11px;color:var(--gray-400);margin-top:4px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* ===== BUTTONS ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:var(--radius);font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all .15s}
+.btn-primary{background:var(--brand);color:#fff}
+.btn-primary:hover{background:var(--brand-dark)}
+.btn-secondary{background:var(--gray-100);color:var(--gray-800)}
+.btn-secondary:hover{background:var(--gray-200)}
+.btn-danger{background:#fff;color:var(--danger);border:1px solid var(--danger)}
+.btn-full{width:100%}
+.btn-sm{padding:6px 12px;font-size:12px}
+
+/* ===== STATS ===== */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:#fff;border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+.stat-label{font-size:11px;color:var(--gray-400);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+.stat-value{font-size:24px;font-weight:700;color:var(--gray-800);line-height:1}
+.stat-sub{font-size:11px;color:var(--gray-400);margin-top:4px}
+.stat-bar{height:4px;background:var(--gray-100);border-radius:2px;margin-top:10px}
+.stat-bar-fill{height:100%;border-radius:2px;background:var(--brand)}
+
+/* ===== TABLE ===== */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{background:var(--gray-50);font-size:12px;font-weight:700;color:var(--gray-600);padding:10px 12px;text-align:left;border-bottom:1px solid var(--gray-200)}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--gray-100);font-size:13px;vertical-align:middle}
+.tbl tr:hover td{background:var(--gray-50)}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700}
+.badge-green{background:#EAF3DE;color:#3B6D11}
+.badge-amber{background:#FAEEDA;color:#633806}
+.badge-red{background:#FCEBEB;color:#A32D2D}
+.badge-gray{background:var(--gray-100);color:var(--gray-600)}
+.badge-blue{background:#E6F1FB;color:#185FA5}
+
+/* ===== PROGRESS ===== */
+.progress-wrap{background:var(--gray-100);border-radius:4px;height:8px;overflow:hidden}
+.progress-fill{height:100%;border-radius:4px;background:var(--brand);transition:width .3s}
+
+/* ===== POINT BAR ===== */
+.pt-bar-wrap{background:var(--gray-100);border-radius:20px;height:12px;overflow:hidden;margin:8px 0}
+.pt-bar-fill{height:100%;border-radius:20px;background:var(--brand);transition:width .3s}
+.pt-info{display:flex;justify-content:space-between;font-size:12px;color:var(--gray-600)}
+
+/* ===== CART ===== */
+.product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.product-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:all .2s;border:2px solid transparent}
+.product-card:hover{border-color:var(--brand-mid)}
+.product-card.selected{border-color:var(--brand)}
+.product-img{height:100px;display:flex;align-items:center;justify-content:center;font-size:40px;background:var(--gray-50)}
+.product-info{padding:12px}
+.product-name{font-size:13px;font-weight:700;margin-bottom:4px}
+.product-pt{font-size:12px;color:var(--brand-dark);font-weight:700}
+.pt-input-wrap{margin-top:8px;display:none}
+.pt-input-wrap.show{display:block}
+.pt-input{width:100%;padding:6px 10px;border:1px solid var(--gray-200);border-radius:6px;font-size:13px;text-align:right}
+
+/* ===== MYPAGE ===== */
+.timeline{padding:0;list-style:none}
+.tl-item{display:flex;gap:12px;padding-bottom:20px;position:relative}
+.tl-item::before{content:'';position:absolute;left:14px;top:28px;bottom:0;width:1px;background:var(--gray-200)}
+.tl-item:last-child::before{display:none}
+.tl-dot{width:28px;height:28px;border-radius:50%;background:var(--brand-light);color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;font-weight:700}
+.tl-body{flex:1;padding-top:4px}
+.tl-title{font-size:13px;font-weight:700;margin-bottom:2px}
+.tl-sub{font-size:12px;color:var(--gray-400)}
+
+/* ===== CRM ===== */
+.inquiry-list{display:flex;flex-direction:column;gap:1px}
+.inquiry-item{background:#fff;padding:14px 16px;cursor:pointer;transition:background .1s;border-left:3px solid transparent}
+.inquiry-item:hover{background:var(--gray-50)}
+.inquiry-item.unread{border-left-color:var(--brand)}
+.inquiry-item.active{background:var(--brand-light);border-left-color:var(--brand)}
+.inq-meta{display:flex;justify-content:space-between;margin-bottom:4px}
+.inq-name{font-size:13px;font-weight:700}
+.inq-time{font-size:11px;color:var(--gray-400)}
+.inq-preview{font-size:12px;color:var(--gray-600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crm-layout{display:grid;grid-template-columns:320px 1fr;gap:0;height:calc(100vh - 100px);background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.crm-list{border-right:1px solid var(--gray-200);overflow-y:auto}
+.crm-detail{padding:20px;overflow-y:auto}
+.chat-bubble{max-width:75%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6;margin-bottom:12px}
+.chat-bubble.staff{background:var(--brand);color:#fff;margin-left:auto;border-bottom-right-radius:4px}
+.chat-bubble.user{background:var(--gray-100);color:var(--gray-800);border-bottom-left-radius:4px}
+.chat-input-wrap{display:flex;gap:8px;padding-top:12px;border-top:1px solid var(--gray-200);margin-top:12px}
+
+/* ===== SETTING ===== */
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--gray-100)}
+.setting-row:last-child{border:none}
+.toggle{width:36px;height:20px;background:var(--gray-200);border-radius:10px;position:relative;cursor:pointer;transition:background .2s}
+.toggle.on{background:var(--brand)}
+.toggle::after{content:'';position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.toggle.on::after{transform:translateX(16px)}
+
+/* ===== SECTION HEADER ===== */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.section-title{font-size:16px;font-weight:700}
+.section-actions{display:flex;gap:8px}
+
+/* ===== RANK TABLE ===== */
+.rank-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;text-align:center}
+.rank-cell{padding:12px;font-size:13px;border-bottom:1px solid var(--gray-100)}
+.rank-cell.header{background:var(--gray-50);font-weight:700;font-size:12px;color:var(--gray-600)}
+
+/* ===== BRAND COLOR PICKER ===== */
+.color-swatch{display:inline-block;width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:border .15s}
+.color-swatch.selected{border-color:var(--gray-800)}
+.color-swatches{display:flex;gap:8px;align-items:center}
+
+/* ===== PAGE WRAPPER for FRONT ===== */
+#front-shell{display:none;flex-direction:column;min-height:100vh;background:#f9f9f7}
+#front-shell.active{display:flex}
+#front-header{background:var(--brand);padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+#front-header .logo{color:#fff;font-size:16px;font-weight:700}
+#front-header .company{color:rgba(255,255,255,0.8);font-size:12px}
+#front-body{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:32px 16px}
+.front-card{background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.1);width:100%;max-width:480px;overflow:hidden}
+.front-card-head{background:var(--brand);padding:20px 24px}
+.front-card-head h2{color:#fff;font-size:18px;font-weight:700}
+.front-card-head p{color:rgba(255,255,255,0.85);font-size:12px;margin-top:4px}
+.front-card-body{padding:24px}
+.front-footer{text-align:center;padding:16px;color:var(--gray-400);font-size:11px}
+
+/* ===== OTP INPUT ===== */
+.otp-wrap{display:flex;gap:8px;justify-content:center;margin:16px 0}
+.otp-box{width:44px;height:52px;border:2px solid var(--gray-200);border-radius:8px;font-size:22px;font-weight:700;text-align:center;outline:none;color:var(--brand-dark)}
+.otp-box:focus{border-color:var(--brand)}
+
+/* ===== COMPLETE ===== */
+.complete-icon{width:72px;height:72px;background:var(--brand-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 16px}
+</style>
+</head>
+<body>
+
+<!-- ======= ADMIN SHELL ======= -->
+<div id="shell">
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <div id="sidebar-logo">
+      <div class="logo-name">株主優待 管理画面</div>
+      <div class="logo-sub" id="tenant-name">A社テナント</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">メイン</div>
+      <div class="nav-item active" onclick="showAdmin('dashboard')">
+        <span class="nav-icon">◼</span>ダッシュボード
+      </div>
+      <div class="nav-item" onclick="showAdmin('shareholders')">
+        <span class="nav-icon">👤</span>株主・申請管理
+      </div>
+      <div class="nav-item" onclick="showAdmin('crm')">
+        <span class="nav-icon">💬</span>問合せ対応
+        <span class="badge badge-red" style="margin-left:auto;font-size:10px">3</span>
+      </div>
+    </div>
+    <div class="nav-divider"></div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">設定</div>
+      <div class="nav-item" onclick="showAdmin('products')">
+        <span class="nav-icon">🎁</span>優待品・ポイント設定
+      </div>
+      <div class="nav-item" onclick="showAdmin('authsetting')">
+        <span class="nav-icon">🔑</span>認証項目設定
+      </div>
+      <div class="nav-item" onclick="showAdmin('mailsetting')">
+        <span class="nav-icon">✉️</span>メール配信設定
+      </div>
+    </div>
+    <div style="margin-top:auto;padding:16px;border-top:1px solid rgba(255,255,255,0.08)">
+      <div style="color:rgba(255,255,255,0.5);font-size:11px">山田 太郎 / 管理者</div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div id="main">
+    <div id="topbar">
+      <div id="topbar-left">
+        <div id="topbar-title">ダッシュボード</div>
+        <span class="topbar-badge">2024年度 優待</span>
+      </div>
+      <div id="topbar-right">
+        <span style="font-size:12px;color:var(--gray-400)">受付期間：2024/10/01〜2024/10/31</span>
+        <div class="avatar">山</div>
+      </div>
+    </div>
+    <div id="content">
+
+      <!-- ===== DASHBOARD ===== -->
+      <div class="screen active" id="screen-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">申請件数</div>
+            <div class="stat-value">3,842</div>
+            <div class="stat-sub">対象 5,200名</div>
+            <div class="stat-bar"><div class="stat-bar-fill" style="width:73%"></div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">申請率</div>
+            <div class="stat-value">73.9<span style="font-size:14px">%</span></div>
+            <div class="stat-sub">前年比 +8.2%</div>
+            <div class="stat-bar"><div class="stat-bar-fill" style="width:74%;background:var(--warning)"></div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">未対応問合せ</div>
+            <div class="stat-value" style="color:var(--danger)">3</div>
+            <div class="stat-sub">本日受信</div>
+            <div class="stat-bar"><div class="stat-bar-fill" style="width:15%;background:var(--danger)"></div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">残り受付日数</div>
+            <div class="stat-value">12</div>
+            <div class="stat-sub">締切：10/31</div>
+            <div class="stat-bar"><div class="stat-bar-fill" style="width:39%"></div></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+          <div class="card">
+            <div class="card-title">優待品別 申請状況</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+                  <span>すかいらーく商品券</span><span style="font-weight:700">1,842件</span>
+                </div>
+                <div class="progress-wrap"><div class="progress-fill" style="width:88%"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+                  <span>モス商品券</span><span style="font-weight:700">1,256件</span>
+                </div>
+                <div class="progress-wrap"><div class="progress-fill" style="width:60%"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+                  <span>QUOカード</span><span style="font-weight:700">744件</span>
+                </div>
+                <div class="progress-wrap"><div class="progress-fill" style="width:35%"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+                  <span>環境団体への寄付</span><span style="font-weight:700">328件</span>
+                </div>
+                <div class="progress-wrap"><div class="progress-fill" style="width:16%"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">保有株数ランク別 申請分布</div>
+            <div class="rank-row">
+              <div class="rank-cell header">ランク</div>
+              <div class="rank-cell header">人数</div>
+              <div class="rank-cell header">申請率</div>
+              <div class="rank-cell">〜99株</div>
+              <div class="rank-cell">1,840名</div>
+              <div class="rank-cell"><span class="badge badge-amber">68%</span></div>
+              <div class="rank-cell">100〜499株</div>
+              <div class="rank-cell">2,890名</div>
+              <div class="rank-cell"><span class="badge badge-green">76%</span></div>
+              <div class="rank-cell">500株以上</div>
+              <div class="rank-cell">470名</div>
+              <div class="rank-cell"><span class="badge badge-green">91%</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-header">
+            <div class="card-title" style="margin:0">最近の申請</div>
+            <button class="btn btn-secondary btn-sm" onclick="showAdmin('shareholders')">一覧を見る</button>
+          </div>
+          <table class="tbl">
+            <tr><th>株主番号</th><th>株主名</th><th>ランク</th><th>選択優待</th><th>申請日時</th><th>ステータス</th></tr>
+            <tr><td>A-00123</td><td>田中 一郎</td><td><span class="badge badge-green">500株+</span></td><td>すかいらーく 3,000pt / モス 2,000pt</td><td>10/12 14:32</td><td><span class="badge badge-blue">確定</span></td></tr>
+            <tr><td>A-00456</td><td>鈴木 花子</td><td><span class="badge badge-amber">100株+</span></td><td>QUOカード 5,000pt</td><td>10/12 13:18</td><td><span class="badge badge-blue">確定</span></td></tr>
+            <tr><td>A-00789</td><td>佐藤 次郎</td><td><span class="badge badge-gray">〜99株</span></td><td>モス 3,000pt</td><td>10/12 11:55</td><td><span class="badge badge-blue">確定</span></td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== SHAREHOLDERS ===== -->
+      <div class="screen" id="screen-shareholders">
+        <div class="section-header">
+          <div class="section-title">株主・申請管理</div>
+          <div class="section-actions">
+            <button class="btn btn-secondary btn-sm">CSVエクスポート</button>
+            <button class="btn btn-primary btn-sm">株主マスタ インポート</button>
+          </div>
+        </div>
+        <div class="card card-sm" style="margin-bottom:16px">
+          <div style="display:flex;gap:10px;align-items:center">
+            <input class="form-input" style="width:200px;padding:8px 12px" placeholder="株主番号・氏名で検索">
+            <select class="form-input" style="width:140px;padding:8px 12px">
+              <option>全ランク</option><option>500株以上</option><option>100〜499株</option><option>〜99株</option>
+            </select>
+            <select class="form-input" style="width:140px;padding:8px 12px">
+              <option>全ステータス</option><option>申請済</option><option>未申請</option>
+            </select>
+          </div>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <table class="tbl">
+            <tr><th>株主番号</th><th>株主名</th><th>保有株数</th><th>ランク</th><th>配布pt</th><th>申請内容</th><th>申請日</th><th>ステータス</th></tr>
+            <tr><td>A-00123</td><td>田中 一郎</td><td>820株</td><td><span class="badge badge-green">500株+</span></td><td>10,000pt</td><td>すかいらーく3,000 / モス2,000 / QUO5,000</td><td>10/12</td><td><span class="badge badge-blue">確定</span></td></tr>
+            <tr><td>A-00456</td><td>鈴木 花子</td><td>120株</td><td><span class="badge badge-amber">100株+</span></td><td>5,000pt</td><td>QUOカード5,000pt</td><td>10/12</td><td><span class="badge badge-blue">確定</span></td></tr>
+            <tr><td>A-00789</td><td>佐藤 次郎</td><td>50株</td><td><span class="badge badge-gray">〜99株</span></td><td>3,000pt</td><td>モス3,000pt</td><td>10/12</td><td><span class="badge badge-blue">確定</span></td></tr>
+            <tr><td>A-01012</td><td>山本 美咲</td><td>200株</td><td><span class="badge badge-amber">100株+</span></td><td>5,000pt</td><td>—</td><td>—</td><td><span class="badge badge-amber">未申請</span></td></tr>
+            <tr><td>A-01345</td><td>伊藤 健太</td><td>300株</td><td><span class="badge badge-amber">100株+</span></td><td>5,000pt</td><td>—</td><td>—</td><td><span class="badge badge-amber">未申請</span></td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== CRM ===== -->
+      <div class="screen" id="screen-crm">
+        <div class="section-header">
+          <div class="section-title">問合せ対応</div>
+          <div class="section-actions">
+            <span class="badge badge-red">未対応 3件</span>
+            <button class="btn btn-secondary btn-sm">フィルター</button>
+          </div>
+        </div>
+        <div class="crm-layout">
+          <div class="crm-list">
+            <div style="padding:10px 12px;border-bottom:1px solid var(--gray-200);font-size:11px;color:var(--gray-400);font-weight:700">全8件</div>
+            <div class="inquiry-item unread active" onclick="selectInquiry(this,1)">
+              <div class="inq-meta"><span class="inq-name">田中 一郎</span><span class="inq-time">14:32</span></div>
+              <div style="margin-bottom:3px"><span class="badge badge-red" style="font-size:10px">未対応</span> <span class="badge badge-gray" style="font-size:10px">フォーム</span></div>
+              <div class="inq-preview">優待品の変更方法について確認したいのですが…</div>
+            </div>
+            <div class="inquiry-item unread" onclick="selectInquiry(this,2)">
+              <div class="inq-meta"><span class="inq-name">鈴木 花子</span><span class="inq-time">11:08</span></div>
+              <div style="margin-bottom:3px"><span class="badge badge-red" style="font-size:10px">未対応</span> <span class="badge badge-blue" style="font-size:10px">TEL</span></div>
+              <div class="inq-preview">ポイントの残り数が表示されないとのこと</div>
+            </div>
+            <div class="inquiry-item unread" onclick="selectInquiry(this,3)">
+              <div class="inq-meta"><span class="inq-name">山本 美咲</span><span class="inq-time">09:44</span></div>
+              <div style="margin-bottom:3px"><span class="badge badge-red" style="font-size:10px">未対応</span> <span class="badge badge-gray" style="font-size:10px">フォーム</span></div>
+              <div class="inq-preview">メールアドレスを変更したい</div>
+            </div>
+            <div class="inquiry-item" onclick="selectInquiry(this,4)">
+              <div class="inq-meta"><span class="inq-name">伊藤 健太</span><span class="inq-time">昨日</span></div>
+              <div style="margin-bottom:3px"><span class="badge badge-green" style="font-size:10px">完了</span> <span class="badge badge-blue" style="font-size:10px">TEL</span></div>
+              <div class="inq-preview">申請完了メールが届かないとのこと</div>
+            </div>
+          </div>
+          <div class="crm-detail" id="crm-detail">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+              <div>
+                <div style="font-size:15px;font-weight:700">田中 一郎</div>
+                <div style="font-size:12px;color:var(--gray-400)">株主番号：A-00123 ／ 500株+ ／ 申請済</div>
+              </div>
+              <div style="display:flex;gap:8px">
+                <span class="badge badge-red">未対応</span>
+                <button class="btn btn-primary btn-sm">対応完了にする</button>
+              </div>
+            </div>
+            <div style="background:var(--gray-50);border-radius:8px;padding:12px;margin-bottom:16px;font-size:12px">
+              <div style="font-weight:700;margin-bottom:4px">問合せ内容（フォーム受信 10/12 14:32）</div>
+              <div style="color:var(--gray-600)">申請した優待品を変更したいのですが、方法を教えていただけますか。すかいらーくの商品券をモスの商品券に変更したいと思っています。まだ受付期間内ですが変更は可能でしょうか。</div>
+            </div>
+            <div style="margin-bottom:12px">
+              <div class="chat-bubble user">申請した優待品を変更したいのですが、方法を教えていただけますか。</div>
+              <div class="chat-bubble staff">受付期間中はマイページから変更が可能です。URLよりログインいただき、「申請内容を変更する」ボタンよりお手続きください。</div>
+            </div>
+            <div class="chat-input-wrap">
+              <input class="form-input" style="flex:1" placeholder="返信メッセージを入力...">
+              <button class="btn btn-primary">送信</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PRODUCTS ===== -->
+      <div class="screen" id="screen-products">
+        <div class="section-header">
+          <div class="section-title">優待品・ポイント設定</div>
+          <button class="btn btn-primary btn-sm">＋ 優待品を追加</button>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">保有株数ランク別 配布ポイント</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+            <div style="border:1px solid var(--gray-200);border-radius:8px;padding:14px">
+              <div style="font-size:11px;font-weight:700;color:var(--gray-400);margin-bottom:6px">〜99株</div>
+              <div style="font-size:22px;font-weight:700;color:var(--brand)">3,000<span style="font-size:13px">pt</span></div>
+              <input class="form-input" style="margin-top:8px;padding:6px 10px;font-size:13px" value="3000">
+            </div>
+            <div style="border:1px solid var(--brand);border-radius:8px;padding:14px;background:var(--brand-light)">
+              <div style="font-size:11px;font-weight:700;color:var(--brand-dark);margin-bottom:6px">100〜499株</div>
+              <div style="font-size:22px;font-weight:700;color:var(--brand)">5,000<span style="font-size:13px">pt</span></div>
+              <input class="form-input" style="margin-top:8px;padding:6px 10px;font-size:13px" value="5000">
+            </div>
+            <div style="border:1px solid var(--gray-200);border-radius:8px;padding:14px">
+              <div style="font-size:11px;font-weight:700;color:var(--gray-400);margin-bottom:6px">500株以上</div>
+              <div style="font-size:22px;font-weight:700;color:var(--brand)">10,000<span style="font-size:13px">pt</span></div>
+              <input class="form-input" style="margin-top:8px;padding:6px 10px;font-size:13px" value="10000">
+            </div>
+          </div>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <table class="tbl">
+            <tr><th>優待品名</th><th>ポイント設定</th><th>在庫</th><th>配布方式</th><th>ステータス</th><th></th></tr>
+            <tr><td>🍽 すかいらーく商品券</td><td>2,000pt 固定</td><td>2,000枚</td><td><span class="badge badge-blue">先着</span></td><td><span class="badge badge-green">受付中</span></td><td><button class="btn btn-secondary btn-sm">編集</button></td></tr>
+            <tr><td>🍔 モス商品券</td><td>2,000pt 固定</td><td>1,500枚</td><td><span class="badge badge-blue">先着</span></td><td><span class="badge badge-green">受付中</span></td><td><button class="btn btn-secondary btn-sm">編集</button></td></tr>
+            <tr><td>💳 QUOカード</td><td>500pt〜 自由入力</td><td>∞</td><td><span class="badge badge-blue">先着</span></td><td><span class="badge badge-green">受付中</span></td><td><button class="btn btn-secondary btn-sm">編集</button></td></tr>
+            <tr><td>🌿 環境団体への寄付</td><td>100pt〜 自由入力</td><td>∞</td><td><span class="badge badge-gray">均等</span></td><td><span class="badge badge-green">受付中</span></td><td><button class="btn btn-secondary btn-sm">編集</button></td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== AUTH SETTING ===== -->
+      <div class="screen" id="screen-authsetting">
+        <div class="section-header">
+          <div class="section-title">認証項目設定</div>
+          <button class="btn btn-primary btn-sm">＋ 項目を追加</button>
+        </div>
+        <div class="card">
+          <p style="font-size:12px;color:var(--gray-600);margin-bottom:16px">株主がログイン時に入力する突合項目を設定します。項目はドラッグで並び替えできます。</p>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--brand);border-radius:8px;background:var(--brand-light)">
+              <span style="color:var(--gray-400);cursor:grab">⠿</span>
+              <span style="font-size:13px;font-weight:700;flex:1">株主番号</span>
+              <span class="badge badge-red">必須</span>
+              <div class="toggle on"></div>
+              <span style="font-size:12px;color:var(--gray-400)">削除不可</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--gray-200);border-radius:8px">
+              <span style="color:var(--gray-400);cursor:grab">⠿</span>
+              <span style="font-size:13px;font-weight:700;flex:1">郵便番号</span>
+              <span class="badge badge-red">必須</span>
+              <div class="toggle on"></div>
+              <button class="btn btn-secondary btn-sm">編集</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--gray-200);border-radius:8px">
+              <span style="color:var(--gray-400);cursor:grab">⠿</span>
+              <span style="font-size:13px;font-weight:700;flex:1">生年月日</span>
+              <span class="badge badge-gray">任意</span>
+              <div class="toggle"></div>
+              <button class="btn btn-secondary btn-sm">編集</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--gray-200);border-radius:8px;background:var(--gray-50)">
+              <span style="color:var(--gray-400);cursor:grab">⠿</span>
+              <span style="font-size:13px;font-weight:700;flex:1;color:var(--gray-400)">電話番号下4桁</span>
+              <span class="badge badge-gray">任意</span>
+              <div class="toggle"></div>
+              <button class="btn btn-secondary btn-sm">編集</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== MAIL SETTING ===== -->
+      <div class="screen" id="screen-mailsetting">
+        <div class="section-header"><div class="section-title">メール配信設定</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="card">
+            <div class="card-title">アララ社 API連携</div>
+            <div class="setting-row">
+              <span style="font-size:13px">APIキー</span>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input class="form-input" style="width:200px;padding:6px 10px;font-size:12px" value="••••••••••••••••" type="password">
+                <button class="btn btn-secondary btn-sm">変更</button>
+              </div>
+            </div>
+            <div class="setting-row">
+              <span style="font-size:13px">接続状態</span>
+              <span class="badge badge-green">接続済</span>
+            </div>
+            <div class="setting-row">
+              <span style="font-size:13px">送信元アドレス</span>
+              <span style="font-size:12px;color:var(--gray-600)">noreply@company.co.jp</span>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">ブランドカラー設定</div>
+            <div class="setting-row">
+              <span style="font-size:13px">プライマリカラー</span>
+              <div class="color-swatches">
+                <div class="color-swatch selected" style="background:#1D9E75" onclick="setBrand('#1D9E75','#0F6E56','#E1F5EE')"></div>
+                <div class="color-swatch" style="background:#185FA5" onclick="setBrand('#185FA5','#0C447C','#E6F1FB')"></div>
+                <div class="color-swatch" style="background:#7F77DD" onclick="setBrand('#7F77DD','#534AB7','#EEEDFE')"></div>
+                <div class="color-swatch" style="background:#D85A30" onclick="setBrand('#D85A30','#993C1D','#FAECE7')"></div>
+                <div class="color-swatch" style="background:#D4537E" onclick="setBrand('#D4537E','#993556','#FBEAF0')"></div>
+                <input type="color" style="width:24px;height:24px;border:none;cursor:pointer;border-radius:50%" value="#1D9E75" oninput="setBrand(this.value,this.value,'#f0f0f0')">
+              </div>
+            </div>
+            <div class="setting-row">
+              <span style="font-size:13px">テナント名</span>
+              <input class="form-input" style="width:160px;padding:6px 10px;font-size:12px" id="tenant-input" value="A社テナント" oninput="document.getElementById('tenant-name').textContent=this.value">
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">メールテンプレート</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray-100)">
+              <span style="font-size:13px">認証パスコード送信メール</span>
+              <button class="btn btn-secondary btn-sm">編集</button>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray-100)">
+              <span style="font-size:13px">申請完了確認メール</span>
+              <button class="btn btn-secondary btn-sm">編集</button>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0">
+              <span style="font-size:13px">未申請者リマインドメール</span>
+              <button class="btn btn-secondary btn-sm">編集</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- ======= FRONT SHELL ======= -->
+<div id="front-shell">
+  <div id="front-header">
+    <div>
+      <div class="logo" id="front-logo">株主優待 お申込みサイト</div>
+      <div class="company" id="front-company">株式会社サンプル 2024年度 株主優待</div>
+    </div>
+    <div style="color:rgba(255,255,255,0.8);font-size:12px">受付期間：2024/10/01〜10/31</div>
+  </div>
+  <div id="front-body">
+
+    <!-- F1: アクセス -->
+    <div class="front-card screen active" id="fscreen-access">
+      <div class="front-card-head">
+        <h2>株主優待 お申込み受付</h2>
+        <p>2024年度 株主優待のお申込みを受け付けております</p>
+      </div>
+      <div class="front-card-body">
+        <p style="font-size:13px;color:var(--gray-600);margin-bottom:20px;line-height:1.7">
+          招集通知に同封のURLよりアクセスいただきありがとうございます。<br>
+          以下の手順でお申込みください。
+        </p>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px">
+          <div style="display:flex;gap:12px;align-items:center;padding:12px;background:var(--gray-50);border-radius:8px">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">1</div>
+            <span style="font-size:13px">株主番号と郵便番号で本人確認</span>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;padding:12px;background:var(--gray-50);border-radius:8px">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">2</div>
+            <span style="font-size:13px">メールアドレスの確認</span>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;padding:12px;background:var(--gray-50);border-radius:8px">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">3</div>
+            <span style="font-size:13px">優待品の選択・申請</span>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="showFront('auth')">お申込みを開始する</button>
+      </div>
+    </div>
+
+    <!-- F2: 株主認証 -->
+    <div class="front-card screen" id="fscreen-auth">
+      <div class="front-card-head">
+        <h2>株主認証</h2>
+        <p>登録情報で本人確認を行います</p>
+      </div>
+      <div class="front-card-body">
+        <div class="flow-steps" style="justify-content:center">
+          <div class="flow-step active"><div class="step-num">1</div><span>株主認証</span></div>
+          <div class="flow-line"></div>
+          <div class="flow-step"><div class="step-num">2</div><span>メール認証</span></div>
+          <div class="flow-line"></div>
+          <div class="flow-step"><div class="step-num">3</div><span>優待選択</span></div>
+          <div class="flow-line"></div>
+          <div class="flow-step"><div class="step-num">4</div><span>完了</span></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">株主番号 <span style="color:var(--danger)">*</span></label>
+          <input class="form-input" placeholder="例：A-00123" value="A-00123">
+        </div>
+        <div class="form-group">
+          <label class="form-label">郵便番号 <span style="color:var(--danger)">*</span></label>
+          <input class="form-input" placeholder="例：1000001" value="1000001">
+          <div class="form-hint">ハイフンなしで入力してください</div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="showFront('email')" style="margin-top:8px">次へ</button>
+        <button class="btn btn-secondary btn-full" onclick="showFront('access')" style="margin-top:8px">戻る</button>
+      </div>
+    </div>
+
+    <!-- F3: メール認証 -->
+    <div class="front-card screen" id="fscreen-email">
+      <div class="front-card-head">
+        <h2>メール認証</h2>
+        <p>送信されたパスコードを入力してください</p>
+      </div>
+      <div class="front-card-body">
+        <div class="flow-steps" style="justify-content:center">
+          <div class="flow-step done"><div class="step-num">✓</div><span>株主認証</span></div>
+          <div class="flow-line done"></div>
+          <div class="flow-step active"><div class="step-num">2</div><span>メール認証</span></div>
+          <div class="flow-line"></div>
+          <div class="flow-step"><div class="step-num">3</div><span>優待選択</span></div>
+          <div class="flow-line"></div>
+          <div class="flow-step"><div class="step-num">4</div><span>完了</span></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">メールアドレス</label>
+          <input class="form-input" placeholder="例：tanaka@example.com" value="tanaka@example.com">
+          <div class="form-hint">登録済みのメールアドレスを入力してください</div>
+        </div>
+        <div style="background:var(--brand-light);border-radius:8px;padding:12px;margin-bottom:16px;font-size:12px;color:var(--brand-dark)">
+          上記のアドレスに6桁のパスコードを送信しました
+        </div>
+        <label class="form-label" style="text-align:center;display:block">パスコードを入力</label>
+        <div class="otp-wrap">
+          <input class="otp-box" maxlength="1" value="4">
+          <input class="otp-box" maxlength="1" value="2">
+          <input class="otp-box" maxlength="1" value="8">
+          <input class="otp-box" maxlength="1" value="7">
+          <input class="otp-box" maxlength="1" value="3">
+          <input class="otp-box" maxlength="1" value="1">
+        </div>
+        <button class="btn btn-primary btn-full" onclick="showFront('select')">認証して次へ</button>
+        <button class="btn btn-secondary btn-full" onclick="showFront('auth')" style="margin-top:8px">戻る</button>
+      </div>
+    </div>
+
+    <!-- F4: 優待選択 -->
+    <div class="front-card screen" id="fscreen-select" style="max-width:640px">
+      <div class="front-card-head">
+        <h2>優待品の選択</h2>
+        <p>ポイントの範囲内でお好きな優待品を選択できます</p>
+      </div>
+      <div class="front-card-body">
+        <div class="flow-steps" style="justify-content:center;margin-bottom:20px">
+          <div class="flow-step done"><div class="step-num">✓</div><span>株主認証</span></div>
+          <div class="flow-line done"></div>
+          <div class="flow-step done"><div class="step-num">✓</div><span>メール認証</span></div>
+          <div class="flow-line done"></div>
+          <div class="flow-step active"><div class="step-num">3</div><span>優待選択</span></div>
+          <div class="flow-line"></div>
+          <div class="flow-step"><div class="step-num">4</div><span>完了</span></div>
+        </div>
+        <div style="background:var(--brand-light);border-radius:8px;padding:14px;margin-bottom:20px">
+          <div class="pt-info">
+            <span style="font-weight:700;color:var(--brand-dark)">配布ポイント（100〜499株ランク）</span>
+            <span style="font-weight:700;color:var(--brand-dark)" id="pt-remain">残り 5,000 pt</span>
+          </div>
+          <div class="pt-bar-wrap"><div class="pt-bar-fill" id="pt-bar" style="width:0%"></div></div>
+          <div class="pt-info" style="margin-top:4px"><span>0pt</span><span>5,000pt</span></div>
+        </div>
+        <div class="product-grid" id="product-grid">
+          <div class="product-card" onclick="toggleProduct(this,2000,'すかいらーく')">
+            <div class="product-img">🍽</div>
+            <div class="product-info">
+              <div class="product-name">すかいらーく商品券</div>
+              <div class="product-pt">2,000pt（固定）</div>
+              <div class="pt-input-wrap"><input class="pt-input" value="2000" readonly></div>
+            </div>
+          </div>
+          <div class="product-card" onclick="toggleProduct(this,2000,'モス')">
+            <div class="product-img">🍔</div>
+            <div class="product-info">
+              <div class="product-name">モス商品券</div>
+              <div class="product-pt">2,000pt（固定）</div>
+              <div class="pt-input-wrap"><input class="pt-input" value="2000" readonly></div>
+            </div>
+          </div>
+          <div class="product-card" onclick="toggleProduct(this,0,'QUO')">
+            <div class="product-img">💳</div>
+            <div class="product-info">
+              <div class="product-name">QUOカード</div>
+              <div class="product-pt">500pt〜 自由入力</div>
+              <div class="pt-input-wrap"><input class="pt-input" placeholder="ptを入力" oninput="updatePt()" onclick="event.stopPropagation()"></div>
+            </div>
+          </div>
+          <div class="product-card" onclick="toggleProduct(this,0,'寄付')">
+            <div class="product-img">🌿</div>
+            <div class="product-info">
+              <div class="product-name">環境団体への寄付</div>
+              <div class="product-pt">100pt〜 自由入力</div>
+              <div class="pt-input-wrap"><input class="pt-input" placeholder="ptを入力" oninput="updatePt()" onclick="event.stopPropagation()"></div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="showFront('complete')" style="margin-top:20px">この内容で申請する</button>
+        <button class="btn btn-secondary btn-full" onclick="showFront('email')" style="margin-top:8px">戻る</button>
+      </div>
+    </div>
+
+    <!-- F5: 完了 -->
+    <div class="front-card screen" id="fscreen-complete">
+      <div class="front-card-head" style="background:var(--brand)">
+        <h2>申請が完了しました</h2>
+        <p>ご申請ありがとうございます</p>
+      </div>
+      <div class="front-card-body" style="text-align:center">
+        <div class="complete-icon">✓</div>
+        <div style="font-size:13px;color:var(--gray-600);margin-bottom:20px;line-height:1.8">
+          以下の内容で申請を受け付けました。<br>
+          確認メールをご登録のアドレスにお送りしました。
+        </div>
+        <div style="background:var(--gray-50);border-radius:8px;padding:16px;text-align:left;margin-bottom:20px">
+          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--gray-200);font-size:13px">
+            <span style="color:var(--gray-600)">受付番号</span><span style="font-weight:700">2024-A-03842</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--gray-200);font-size:13px">
+            <span style="color:var(--gray-600)">申請日時</span><span>2024/10/12 14:32</span>
+          </div>
+          <div style="padding:6px 0;font-size:13px">
+            <div style="color:var(--gray-600);margin-bottom:4px">申請内容</div>
+            <div>すかいらーく商品券 2,000pt</div>
+            <div>モス商品券 2,000pt</div>
+            <div>QUOカード 1,000pt</div>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-full" onclick="showFront('mypage')">マイページで確認する</button>
+      </div>
+    </div>
+
+    <!-- F6: マイページ -->
+    <div class="front-card screen" id="fscreen-mypage" style="max-width:520px">
+      <div class="front-card-head">
+        <h2>マイページ</h2>
+        <p>田中 一郎 様 / A-00123</p>
+      </div>
+      <div class="front-card-body">
+        <div style="background:var(--brand-light);border-radius:8px;padding:14px;margin-bottom:20px">
+          <div style="font-size:12px;color:var(--brand-dark);font-weight:700;margin-bottom:4px">申請ステータス</div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span class="badge badge-blue" style="font-size:13px;padding:4px 12px">申請済み（変更可能）</span>
+            <span style="font-size:12px;color:var(--brand-dark)">受付期間内</span>
+          </div>
+        </div>
+        <div class="card-title">申請内容</div>
+        <ul class="timeline">
+          <li class="tl-item">
+            <div class="tl-dot">🍽</div>
+            <div class="tl-body">
+              <div class="tl-title">すかいらーく商品券</div>
+              <div class="tl-sub">2,000pt</div>
+            </div>
+          </li>
+          <li class="tl-item">
+            <div class="tl-dot">🍔</div>
+            <div class="tl-body">
+              <div class="tl-title">モス商品券</div>
+              <div class="tl-sub">2,000pt</div>
+            </div>
+          </li>
+          <li class="tl-item">
+            <div class="tl-dot">💳</div>
+            <div class="tl-body">
+              <div class="tl-title">QUOカード</div>
+              <div class="tl-sub">1,000pt</div>
+            </div>
+          </li>
+        </ul>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button class="btn btn-primary" style="flex:1" onclick="showFront('select')">申請内容を変更する</button>
+          <button class="btn btn-danger btn-sm">キャンセル</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /front-body -->
+  <div class="front-footer">
+    株式会社サンプル　／　個人情報の取扱いについて　／　お問合せ
+  </div>
+</div><!-- /front-shell -->
+
+<!-- SWITCHER -->
+<div id="mode-switch">
+  <button class="mode-btn active" onclick="setMode('admin')">管理画面</button>
+  <button class="mode-btn" onclick="setMode('front')">株主フロント</button>
+</div>
+
+<script>
+var mode = 'admin';
+var usedPt = 0;
+var totalPt = 5000;
+
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (m === 'admin') {
+    document.getElementById('shell').style.display = 'flex';
+    document.getElementById('front-shell').classList.remove('active');
+  } else {
+    document.getElementById('shell').style.display = 'none';
+    document.getElementById('front-shell').classList.add('active');
+  }
+}
+
+function showAdmin(id) {
+  document.querySelectorAll('#content .screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  var titles = {
+    dashboard:'ダッシュボード', shareholders:'株主・申請管理', crm:'問合せ対応（CRM）',
+    products:'優待品・ポイント設定', authsetting:'認証項目設定', mailsetting:'メール配信設定'
+  };
+  document.getElementById('topbar-title').textContent = titles[id] || id;
+}
+
+function showFront(id) {
+  document.querySelectorAll('#front-body .screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('fscreen-' + id).classList.add('active');
+}
+
+function selectInquiry(el, id) {
+  document.querySelectorAll('.inquiry-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function toggleProduct(card, pt, name) {
+  var inputWrap = card.querySelector('.pt-input-wrap');
+  if (card.classList.contains('selected')) {
+    card.classList.remove('selected');
+    inputWrap.classList.remove('show');
+  } else {
+    card.classList.add('selected');
+    inputWrap.classList.add('show');
+  }
+  updatePt();
+}
+
+function updatePt() {
+  var used = 0;
+  document.querySelectorAll('.product-card.selected').forEach(card => {
+    var inp = card.querySelector('.pt-input');
+    var v = parseInt(inp.value) || 0;
+    used += v;
+  });
+  usedPt = used;
+  var remain = totalPt - usedPt;
+  document.getElementById('pt-remain').textContent = '残り ' + remain.toLocaleString() + ' pt';
+  var pct = Math.min(100, (usedPt / totalPt) * 100);
+  document.getElementById('pt-bar').style.width = pct + '%';
+  if (remain < 0) {
+    document.getElementById('pt-remain').style.color = 'var(--danger)';
+    document.getElementById('pt-bar').style.background = 'var(--danger)';
+  } else {
+    document.getElementById('pt-remain').style.color = 'var(--brand-dark)';
+    document.getElementById('pt-bar').style.background = 'var(--brand)';
+  }
+}
+
+function setBrand(c, d, l) {
+  document.documentElement.style.setProperty('--brand', c);
+  document.documentElement.style.setProperty('--brand-dark', d);
+  document.documentElement.style.setProperty('--brand-light', l);
+  document.documentElement.style.setProperty('--brand-mid', c);
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+  if (event && event.target) event.target.classList.add('selected');
+}
+</script>
+</body>
+</html>
